@@ -28,8 +28,8 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
 
       cellMap.toSeq.map {
         case (i, cells) =>
-          Row(i, cells.sortWith { (c1, c2) => c1.colNumber < c2.colNumber })
-      }.sortWith((r1, r2) => r1.rowNumber < r2.rowNumber)
+          Row(i, cells.sorted)
+      }.sorted
     }
   }
 }
