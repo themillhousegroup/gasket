@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 case class Worksheet(private val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
-  val cellFeedBaseUrl = new URI(googleEntry.getCellFeedUrl.toString).toURL
+  lazy val cellFeedBaseUrl = new URI(googleEntry.getCellFeedUrl.toString).toURL
   // + "?min-row=2&min-col=4&max-col=4").toURL();
 
   lazy val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])

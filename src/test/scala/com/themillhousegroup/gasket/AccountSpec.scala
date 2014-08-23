@@ -3,17 +3,15 @@ package com.themillhousegroup.gasket
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.client.GoogleService.InvalidCredentialsException
 import com.google.gdata.data.spreadsheet.{ SpreadsheetEntry, SpreadsheetFeed }
 import java.net.URL
-import com.google.gdata.data.{ PlainTextConstruct, TextConstruct }
+import com.google.gdata.data.PlainTextConstruct
+import com.themillhousegroup.gasket.test.TestHelpers
 
-class AccountSpec extends Specification with Mockito {
-
-  val shortWait = Duration(100L, "millis")
+class AccountSpec extends Specification with Mockito with TestHelpers {
 
   class MockAccountScope extends Scope {
 
@@ -26,13 +24,13 @@ class AccountSpec extends Specification with Mockito {
     }
 
     def gettingAccount = {
-      Await.result(TestAccount("", ""), shortWait)
+      waitFor(TestAccount("", ""))
     }
 
     lazy val acct = gettingAccount
 
     def gettingSpreadsheets = {
-      Await.result(acct.spreadsheets, shortWait)
+      waitFor(acct.spreadsheets)
     }
   }
 
