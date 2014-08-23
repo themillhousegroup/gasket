@@ -1,8 +1,6 @@
 package com.themillhousegroup.gasket
 
-import com.google.gdata.data.spreadsheet.ListEntry
-import com.themillhousegroup.gasket.traits.ScalaEntry
-
-case class Row(val parent: Worksheet, val googleEntry: ListEntry) extends ScalaEntry[ListEntry] {
+/** Cells are what actually make up the Worksheet; Rows are basically a view onto them */
+case class Row(rowNumber: Int, cells: Seq[Cell]) {
 
 }
