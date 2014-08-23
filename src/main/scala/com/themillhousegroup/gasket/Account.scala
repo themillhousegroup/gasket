@@ -7,9 +7,14 @@ import com.themillhousegroup.gasket.traits.Timing
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Account {
+object Account extends AccountBuilder
+
+// Solely to allow a mocked SpreadsheetService for testing
+protected[this] class AccountBuilder {
+  val service = new SpreadsheetService("gasket")
+
   def apply(username: String, password: String): Future[Account] = Future {
-    val service = new SpreadsheetService("gasket")
+
     service.setUserCredentials(username, password)
     new Account(service)
   }
