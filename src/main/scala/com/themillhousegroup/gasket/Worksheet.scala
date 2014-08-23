@@ -4,6 +4,8 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.data.spreadsheet.{ CellFeed, WorksheetEntry }
 import com.themillhousegroup.gasket.traits.{ Timing, ScalaEntry }
 import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class Worksheet(private val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
@@ -13,18 +15,21 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
   lazy val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
 
   /** Cells are what actually make up the Worksheet; Rows are basically a view onto them */
-  def cells: Seq[Cell] = {
+  def cells: Future[Seq[Cell]] = Future {
     import scala.collection.JavaConverters._
 
     time("cells fetch", cellFeed.getEntries).asScala.map(Cell(this, _))
   }
 
   /** Cells are what actually make up the Worksheet; Rows are basically a view onto them */
-  def rows: Seq[Row] = {
-    val cellMap = cells.groupBy(_.rowNumber)
-    cellMap.toSeq.map {
-      case (i, cells) =>
-        Row(i, cells.sortWith { (c1, c2) => c1.colNumber < c2.colNumber })
-    }.sortWith((r1, r2) => r1.rowNumber < r2.rowNumber)
+  def rows: Future[Seq[Row]] = {
+    cells.map { c =>
+      val cellMap = c.groupBy(_.rowNumber)
+
+      cellMap.toSeq.map {
+        case (i, cells) =>
+          Row(i, cells.sortWith { (c1, c2) => c1.colNumber < c2.colNumber })
+      }.sortWith((r1, r2) => r1.rowNumber < r2.rowNumber)
+    }
   }
 }
