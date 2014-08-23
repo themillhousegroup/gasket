@@ -7,7 +7,7 @@ The Java API as provided by Google is quite tedious to use, requiring a lot of b
 combined with occasional "magic strings" to make it all work properly.
 
 The intent of this library is to present a far-simpler view, where each level on the hierarchy of objects (see below)
-is an appropriately-typed ```scala.collections.immutable.Map```, allowing idiomatic operations.
+is an appropriate type from ```scala.collection.immutable```, allowing idiomatic operations.
 
 
 The Gasket Hierarchy

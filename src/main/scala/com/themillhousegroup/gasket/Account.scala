@@ -19,9 +19,9 @@ class Account(private[this] val service: SpreadsheetService) {
 
   private[this] lazy val spreadsheetFeed = service.getFeed(SPREADSHEET_FEED_URL, classOf[SpreadsheetFeed])
 
-  def spreadsheets: Seq[Spreadsheet] = {
+  def spreadsheets: Map[String, Spreadsheet] = {
     import scala.collection.JavaConverters._
-    spreadsheetFeed.getEntries.asScala.map(Spreadsheet(service, _))
+    spreadsheetFeed.getEntries.asScala.map(Spreadsheet(service, _)).map(s => s.title -> s).toMap
   }
 
 }

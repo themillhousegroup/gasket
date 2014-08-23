@@ -3,9 +3,10 @@ package com.themillhousegroup.gasket.traits
 import com.google.gdata.data.BaseEntry
 
 trait ScalaEntry[T <: BaseEntry[T]] {
-  protected val entry: T
+  /** Access to the underlying Google *Entry object */
+  val googleEntry: T
 
-  lazy val title = entry.getTitle.getPlainText
+  lazy val title = googleEntry.getTitle.getPlainText
 
   override def toString = title
 }
