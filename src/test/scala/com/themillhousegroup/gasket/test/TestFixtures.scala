@@ -34,10 +34,22 @@ trait TestFixtures {
   mockWorksheetEntry.getCellFeedUrl returns fakeUrl
 
   val mockCellFeed = mock[CellFeed]
-  val c1 = mock[CellEntry]
-  val c2 = mock[CellEntry]
-  c1.getTitle returns new PlainTextConstruct("one")
-  c2.getTitle returns new PlainTextConstruct("two")
-  mockCellFeed.getEntries returns com.google.common.collect.Lists.newArrayList(c1, c2)
+
+  def mockCellEntry(row: Int, col: Int) = {
+    val ce = mock[CellEntry]
+    ce.getTitle returns new PlainTextConstruct(s"row$row, col$col")
+    val c = mock[Cell]
+    ce.getCell returns c
+    c.getCol returns col
+    c.getRow returns row
+    ce
+  }
+
+  val c1 = mockCellEntry(1, 1)
+  val c2 = mockCellEntry(1, 2)
+  val c3 = mockCellEntry(2, 1)
+  val c4 = mockCellEntry(2, 2)
+
+  mockCellFeed.getEntries returns com.google.common.collect.Lists.newArrayList(c1, c2, c3, c4)
 
 }
