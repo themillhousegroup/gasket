@@ -35,6 +35,25 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       result must haveSize(9)
     }
 
+    "get all nine cells as a Seq[String]" in {
+
+      val futureCellContents =
+        for {
+          acct <- Account(username, password)
+          ss <- acct.spreadsheets
+          ws <- ss("Example Spreadsheet").worksheets
+          cells <- ws("Sheet1").cells
+          contents = cells.map(_.value)
+        } yield contents
+
+      val result = Await.result(futureCellContents, timeout)
+      result must not beEmpty
+
+      result must haveSize(9)
+      result.head must beEqualTo("Top Left")
+      result.last must beEqualTo("Bottom Right")
+    }
+
     "get all three rows" in {
 
       val futureRows =
