@@ -11,9 +11,24 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
 
   private def toUrl(s: String): URL = new URI(s).toURL
 
-  lazy val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
-  lazy val cellFeedBaseUrl = toUrl(cellFeedBaseUrlString)
-  lazy val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
+  lazy private[this] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
+  lazy private[this] val cellFeedBaseUrl = toUrl(cellFeedBaseUrlString)
+  lazy private[this] val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
+
+  lazy val rowCount = googleEntry.getRowCount
+  lazy val colCount = googleEntry.getColCount
+
+  /**
+   * For convenience; The String contents of the first row of this worksheet
+   */
+  lazy val headerLabels: Future[Seq[String]] = {
+    if (rowCount == 0) {
+      Future.successful(Seq[String]())
+    } else {
+      val headerBlock = block(1 to 1, 1 to colCount)
+      headerBlock.map(_.head.cells.map(_.value))
+    }
+  }
 
   /** Cells are what actually make up the Worksheet; Rows are basically a view onto them */
   def cells: Future[Seq[Cell]] = Future {
@@ -51,5 +66,19 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
     val futureBlockCells = Future(time("cell block fetch", blockCellFeed.getEntries).asScala.map(Cell(this, _)))
 
     asRows(futureBlockCells)
+  }
+
+  /**
+   * When given a Seq of Cells,
+   * returns a future holding a new Seq where each element is
+   * a tuple of (headerLabel -> Cell)
+   */
+  def withHeaderLabels(cells: Seq[Cell]): Future[Seq[(String, Cell)]] = {
+    headerLabels.map { headers =>
+      cells.map { cell =>
+        val column = cell.colNumber
+        headers(column - 1) -> cell
+      }
+    }
   }
 }

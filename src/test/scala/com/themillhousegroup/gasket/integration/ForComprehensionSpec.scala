@@ -89,5 +89,30 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       blockRows.last.cells.last.value must beEqualTo("Center Right")
     }
 
+    "be able to iterate over the cells with their header labels in tuples" in {
+
+      val futureTuples =
+        for {
+          acct <- Account(username, password)
+          ss <- acct.spreadsheets
+          ws <- ss("Example Spreadsheet").worksheets
+          w = ws("Sheet1")
+          cells <- w.cells
+          tuples <- w.withHeaderLabels(cells)
+        } yield tuples
+
+      val headerCellTuples = Await.result(futureTuples, timeout)
+
+      headerCellTuples must haveSize(9)
+
+      val headersAndContents = headerCellTuples.map(t => t._1 -> t._2.value)
+
+      headersAndContents(3) must beEqualTo("Top Left" -> "Center Left")
+      headersAndContents(5) must beEqualTo("Top Right" -> "Center Right")
+
+      headersAndContents(6) must beEqualTo("Top Left" -> "Bottom Left")
+      headersAndContents(8) must beEqualTo("Top Right" -> "Bottom Right")
+    }
+
   }
 }

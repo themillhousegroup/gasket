@@ -34,6 +34,7 @@ trait TestFixtures {
   mockWorksheetEntry.getCellFeedUrl returns fakeUrl
 
   val mockCellFeed = mock[CellFeed]
+  val mockEmptyCellFeed = mock[CellFeed]
 
   def mockCellEntry(row: Int, col: Int) = {
     val ce = mock[CellEntry]
@@ -42,6 +43,7 @@ trait TestFixtures {
     ce.getCell returns c
     c.getCol returns col
     c.getRow returns row
+    c.getValue returns s"R${row}C${col}"
     ce
   }
 
@@ -51,5 +53,6 @@ trait TestFixtures {
   val c4 = mockCellEntry(2, 2)
 
   mockCellFeed.getEntries returns com.google.common.collect.Lists.newArrayList(c1, c2, c3, c4)
-
+  mockWorksheetEntry.getRowCount returns 2
+  mockWorksheetEntry.getColCount returns 2
 }
