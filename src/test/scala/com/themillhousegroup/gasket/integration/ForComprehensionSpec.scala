@@ -15,6 +15,8 @@ import com.themillhousegroup.gasket.test.GasketIntegrationSettings
  *  Bottom Left	  Bottom Middle	  Bottom Right
  *
  *
+ *  See GasketIntegrationSettings for information about how to set
+ *  up a suitable file on your local system to hold credentials.
  */
 class ForComprehensionSpec extends Specification with GasketIntegrationSettings {
 
