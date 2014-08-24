@@ -48,7 +48,7 @@ Examples
 (Taken from the [ForComprehensionSpec](https://github.com/themillhousegroup/gasket/blob/master/src/test/scala/com/themillhousegroup/gasket/integration/ForComprehensionSpec.scala)
 which contains several more examples):
 
-*** Getting the content of all the cells in a worksheet as a ```Future[Seq[String]]```:
+#### Getting the content of all the cells in a worksheet as a ```Future[Seq[String]]```:
 
    ```
        val futureCellContents =
@@ -61,7 +61,7 @@ which contains several more examples):
            } yield contents
    ```
 
-*** Getting a rectangular block of cells in a worksheet as a ```Future[Seq[Row]]```:
+#### Getting a rectangular block of cells in a worksheet as a ```Future[Seq[Row]]```:
 
    ```
       val futureRows =
