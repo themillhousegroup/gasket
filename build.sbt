@@ -1,18 +1,18 @@
 name := "gasket"
 
-version := "0.2.0"
+version := "1.0.0"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
-crossScalaVersions := Seq("2.11.1", "2.10.4")
+crossScalaVersions := Seq("2.11.2", "2.10.4")
 
 organization := "com.themillhousegroup"
 
 libraryDependencies ++= Seq(
-    "com.google.gdata"      % "core"                    % "1.47.1",
-    "ch.qos.logback"        % "logback-classic"         % "1.1.2",
-    "org.mockito"           %   "mockito-all"           % "1.9.0",
-    "org.specs2"            %% "specs2"                 % "2.3.12"
+    "com.google.gdata"      %   "core"                    % "1.47.1",
+    "ch.qos.logback"        %   "logback-classic"         % "1.1.2",
+    "org.mockito"           %   "mockito-all"             % "1.9.0",
+    "org.specs2"            %%  "specs2"                  % "2.3.12"  % "test"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
