@@ -3,7 +3,6 @@ package com.themillhousegroup.gasket.test
 import scala.concurrent.duration.Duration
 import java.io.File
 
-
 /**
  * Expects to be able to find a file at:
  *

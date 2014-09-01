@@ -32,6 +32,28 @@ The Gasket Hierarchy
 
 ```Row```s are an artificial collection representing some-or-all of the ```Cell```s on one row.
 
+Installation
+============
+Bring in the library by adding the following to your ```build.sbt```. 
+
+The release repository: 
+
+```
+   resolvers ++= Seq(
+     "millhouse-releases" at "http://repository-themillhousegroup.forge.cloudbees.com/release"
+   )
+```
+The dependency itself: 
+
+```
+   libraryDependencies ++= Seq(
+     "com.themillhousegroup" %% "gasket" % "1.0.0"
+   )
+
+```
+
+
+
 Implementation
 ==============
 
