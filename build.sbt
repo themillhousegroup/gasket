@@ -1,6 +1,6 @@
 name := "gasket"
 
-version := "1.0.0"
+version := s"${sys.props.getOrElse("build.majorMinor", "1.0")}.${sys.props.getOrElse("build.version", "SNAPSHOT")}"
 
 scalaVersion := "2.11.2"
 
