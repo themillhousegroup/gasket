@@ -19,7 +19,7 @@ import java.io.File
  * Account -> Security -> App Passwords -> Settings
  */
 trait GasketIntegrationSettings {
-  lazy val timeout = Duration(10, "seconds")
+  lazy val timeout = Duration(30, "seconds")
 
   lazy val homeDir = System.getProperty("user.home")
   lazy val credentialsFile = new File(s"$homeDir/.gasket", ".credentials")
