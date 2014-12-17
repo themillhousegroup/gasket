@@ -21,9 +21,13 @@ resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/reposit
 
 jacoco.settings
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+seq(bintraySettings:_*)
 
-publishTo := Some("Cloudbees releases" at "https://repository-themillhousegroup.forge.cloudbees.com/"+ "release")
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+
+scalariformSettings
+
+net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 scalariformSettings
 
