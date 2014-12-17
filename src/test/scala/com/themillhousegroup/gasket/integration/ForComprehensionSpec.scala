@@ -3,7 +3,7 @@ package com.themillhousegroup.gasket.integration
 import org.specs2.mutable.Specification
 import com.themillhousegroup.gasket.Account
 import scala.concurrent.Await
-import com.themillhousegroup.gasket.test.GasketIntegrationSettings
+import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSettings }
 
 /**
  * For the purposes of these examples, there exists a spreadsheet
@@ -18,7 +18,7 @@ import com.themillhousegroup.gasket.test.GasketIntegrationSettings
  *  See GasketIntegrationSettings for information about how to set
  *  up a suitable file on your local system to hold credentials.
  */
-class ForComprehensionSpec extends Specification with GasketIntegrationSettings {
+class ForComprehensionSpec extends Specification with GasketIntegrationSettings with TestHelpers {
 
   "For Comprehension example" should {
     "get all nine cells" in {
@@ -31,7 +31,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           cells <- ws("Sheet1").cells
         } yield cells
 
-      val result = Await.result(futureCells, timeout)
+      val result = Await.result(futureCells, shortWait)
       result must not beEmpty
 
       result must haveSize(9)
@@ -48,7 +48,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           contents = cells.map(_.value)
         } yield contents
 
-      val result = Await.result(futureCellContents, timeout)
+      val result = Await.result(futureCellContents, shortWait)
       result must not beEmpty
 
       result must haveSize(9)
@@ -66,7 +66,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           rows <- ws("Sheet1").rows
         } yield rows
 
-      val result = Await.result(futureRows, timeout)
+      val result = Await.result(futureRows, shortWait)
       result must not beEmpty
 
       result must haveSize(3)
@@ -82,7 +82,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           rows <- ws("Sheet1").block(1 to 2, 2 to 3)
         } yield rows
 
-      val blockRows = Await.result(futureRows, timeout)
+      val blockRows = Await.result(futureRows, shortWait)
       blockRows must not beEmpty
 
       blockRows must haveSize(2)
@@ -103,7 +103,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           tuples <- w.withHeaderLabels(cells)
         } yield tuples
 
-      val headerCellTuples = Await.result(futureTuples, timeout)
+      val headerCellTuples = Await.result(futureTuples, shortWait)
 
       headerCellTuples must haveSize(9)
 
