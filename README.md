@@ -36,18 +36,18 @@ Installation
 ============
 Bring in the library by adding the following to your ```build.sbt```. 
 
-The release repository: 
+  - The release repository: 
 
 ```
    resolvers ++= Seq(
-     "millhouse-releases" at "http://repository-themillhousegroup.forge.cloudbees.com/release"
+     "Millhouse Bintray"  at "http://dl.bintray.com/themillhousegroup/maven"
    )
 ```
-The dependency itself: 
+  - The dependency itself: 
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "gasket" % "1.0.0"
+     "com.themillhousegroup" %% "gasket" % "1.0.3"
    )
 
 ```
