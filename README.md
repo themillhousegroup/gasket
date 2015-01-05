@@ -32,6 +32,16 @@ The Gasket Hierarchy
 
 ```Row```s are an artificial collection representing some-or-all of the ```Cell```s on one row.
 
+What Could I Use This For?
+============
+
+The sky's the limit, and if you're here, you probably already have an application in mind. But a few other ideas:
+ 
+ - Use a Google Spreadsheet as a source of app configuration data
+ - Crunch spreadsheet numbers using the power of Scala 
+ - A straightforward and user-friendly way to feed tabular data into an application
+  
+
 Installation
 ============
 Bring in the library by adding the following to your ```build.sbt```. 
