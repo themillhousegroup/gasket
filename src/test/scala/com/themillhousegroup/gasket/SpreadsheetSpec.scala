@@ -2,11 +2,11 @@ package com.themillhousegroup.gasket
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import com.themillhousegroup.gasket.test.{ TestFixtures, TestHelpers }
+import com.themillhousegroup.gasket.test.{ WorksheetFeedTestFixtures, TestFixtures, TestHelpers }
 import java.net.URL
 import com.google.gdata.data.spreadsheet.WorksheetFeed
 
-class SpreadsheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
+class SpreadsheetSpec extends Specification with Mockito with TestHelpers with WorksheetFeedTestFixtures {
 
   mockService.getFeed(any[URL], any[Class[WorksheetFeed]]) returns mockWorksheetFeed
 

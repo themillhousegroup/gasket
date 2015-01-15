@@ -2,16 +2,13 @@ package com.themillhousegroup.gasket
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import com.themillhousegroup.gasket.test.{ TestHelpers, TestFixtures }
+import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers, TestFixtures }
 import java.net.URL
 import com.google.gdata.data.spreadsheet.{ WorksheetEntry, CellFeed }
 import org.specs2.specification.Scope
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 
-class WorksheetSpec extends Specification with Mockito with TestFixtures with TestHelpers {
-  val mockSpreadsheet = mock[Spreadsheet]
-
-  mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
+class WorksheetSpec extends Specification with Mockito with TestHelpers with CellFeedTestFixtures {
 
   class WorksheetScope extends Scope {
     val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)

@@ -6,6 +6,7 @@ import java.net.URL
 import com.google.gdata.data.PlainTextConstruct
 import org.specs2.mock.Mockito
 import com.google.gdata.client.GoogleService.InvalidCredentialsException
+import com.themillhousegroup.gasket.Spreadsheet
 
 trait TestFixtures {
   this: Mockito =>
@@ -55,4 +56,18 @@ trait TestFixtures {
   mockCellFeed.getEntries returns com.google.common.collect.Lists.newArrayList(c1, c2, c3, c4)
   mockWorksheetEntry.getRowCount returns 2
   mockWorksheetEntry.getColCount returns 2
+}
+
+trait CellFeedTestFixtures extends TestFixtures {
+  this: Mockito =>
+
+  val mockSpreadsheet = mock[Spreadsheet]
+
+  mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
+}
+
+trait WorksheetFeedTestFixtures extends TestFixtures {
+  this: Mockito =>
+
+  mockService.getFeed(any[URL], any[Class[WorksheetFeed]]) returns mockWorksheetFeed
 }
