@@ -1,15 +1,20 @@
 package com.themillhousegroup.gasket
 
-import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers, TestFixtures }
+import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers }
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import java.net.URL
-import com.google.gdata.data.spreadsheet.CellFeed
+import com.google.gdata.data.spreadsheet.CellEntry
 
 class CellSpec extends Specification with Mockito with TestHelpers with CellFeedTestFixtures {
 
   val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
   val fCells = w.cells
+
+  def mockCopyConstructor(ce: CellEntry): CellEntry = {
+    val newCE = mockCellEntry(ce.getCell.getRow, ce.getCell.getCol)
+    newCE.update returns newCE
+    newCE
+  }
 
   "Should return self if updating a cell to its current value" in {
     val cells = waitFor(fCells)
@@ -19,6 +24,9 @@ class CellSpec extends Specification with Mockito with TestHelpers with CellFeed
   }
 
   "Should allow update by returning a Future version containing the new value" in {
-    true must beTrue
+    val fakeCell = Cell(w, c1, mockCopyConstructor)
+    val content = fakeCell.value
+
+    waitFor(fakeCell.update(content + "-modified")) must not be equalTo(fakeCell)
   }
 }

@@ -5,7 +5,9 @@ import com.google.gdata.data.spreadsheet.CellEntry
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Cell(parent: Worksheet, val googleEntry: CellEntry) extends ScalaEntry[CellEntry] with Ordered[Cell] {
+case class Cell(parent: Worksheet,
+    val googleEntry: CellEntry,
+    cellEntryCopyConstructor: (CellEntry) => CellEntry = Cell.copyConstructor) extends ScalaEntry[CellEntry] with Ordered[Cell] {
   lazy val value = googleEntry.getCell.getValue
   lazy val numericValue = googleEntry.getCell.getNumericValue
 
@@ -27,10 +29,15 @@ case class Cell(parent: Worksheet, val googleEntry: CellEntry) extends ScalaEntr
       Future.successful(this)
     } else {
       Future {
-        val newEntry = new CellEntry(rowNumber, colNumber, newValue)
+        val newEntry = cellEntryCopyConstructor(googleEntry)
+        newEntry.changeInputValueLocal(newValue)
         val fromRemote = newEntry.update // Blocks
         Cell(parent, fromRemote)
       }
     }
   }
+}
+
+object Cell {
+  def copyConstructor(ce: CellEntry): CellEntry = new CellEntry(ce)
 }

@@ -7,6 +7,7 @@ import com.google.gdata.data.PlainTextConstruct
 import org.specs2.mock.Mockito
 import com.google.gdata.client.GoogleService.InvalidCredentialsException
 import com.themillhousegroup.gasket.Spreadsheet
+import scala.collection.JavaConverters._
 
 trait TestFixtures {
   this: Mockito =>
