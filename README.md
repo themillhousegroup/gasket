@@ -56,7 +56,7 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "gasket" % "1.0.3"
+     "com.themillhousegroup" %% "gasket" % "1.1.10"
    )
 
 ```
@@ -123,8 +123,17 @@ Although `Cell` is immutable, it has an `update` method with the following signa
 
    `def update(newValue: String): Future[Cell]`
    
-That is, it performs the API call to update the remote spreadsheet, and returns a future version of the Cell with the desired value within. 
+That is, it performs the API call to update the remote spreadsheet, and returns a future version of the Cell with the desired value within. Because it's returning a `Future`, you can even make it a part of a for-comprehension - here's an example where the first cell with value "0" is changed to have value "EMPTY":
 
+```
+   for {
+     acct <- Account(username, password)
+     ss <- acct.spreadsheets
+     ws <- ss("Example Spreadsheet").worksheets
+     cells <- ws("Sheet3").cells
+     newCell <- cells.filter(_.value == "0").head.update("EMPTY"")
+   } yield newCell
+```
 
 Troubleshooting
 ===============
