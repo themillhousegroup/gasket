@@ -8,8 +8,7 @@ The Java API as provided by Google is quite tedious to use, requiring a lot of b
 combined with occasional "magic strings" to make it all work properly.
 
 The intent of this library is to present a far-simpler view, where each level on the hierarchy of objects (see below)
-is an appropriate type from ```scala.collection.immutable```, allowing idiomatic operations. Note that this is currently
-a *READ-ONLY* implementation - no modifications are ever "pushed back" into the source spreadsheet(s).
+is an appropriate type from ```scala.collection.immutable```, allowing idiomatic operations.
 
 
 The Gasket Hierarchy
@@ -116,6 +115,15 @@ Will return 2 ```Row``` objects:
 
 Row: ```2 3```
 Row: ```5 6```
+
+
+#### Pushing individual values back into the Google Spreadsheet
+
+Although `Cell` is immutable, it has an `update` method with the following signature:
+
+   `def update(newValue: String): Future[Cell]`
+   
+That is, it performs the API call to update the remote spreadsheet, and returns a future version of the Cell with the desired value within. 
 
 
 Troubleshooting
