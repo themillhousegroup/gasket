@@ -24,7 +24,7 @@ case class Row(rowNumber: Int, cells: Seq[Cell]) extends Ordered[Row] {
    * the `cells` Seq in this row might not be lined up
    * with the columns in the worksheet - i.e. cells(3) might not actually be
    * the fourth column in the sheet.
-   * This function provides a way to access the cells by the "A1-style" 1-based column name
+   * This function provides a way to access the cells by the "A1-style" alphabetical column name
    * @param columnName
    */
   def cellAt(columnName: String): Option[Cell] = {
@@ -35,4 +35,21 @@ case class Row(rowNumber: Int, cells: Seq[Cell]) extends Ordered[Row] {
       }
     }
   }
+
+  /**
+   * Direct access to the contents of the Cells that make up this Row.
+   * Note that due to the Google API omitting empty cells, this might
+   * not "line up" with the visual appearance of the row.
+   */
+  def values: Seq[String] = cells.map(_.value)
+
+  /**
+   * Direct access to the contents of the Cells that make up this Row.
+   * Note that due to the Google API omitting empty cells, this might
+   * not "line up" with the visual appearance of the row.
+   *
+   * @return a seq of (columnNumber, value) tuples
+   */
+  def columnValues: Seq[(Int, String)] = cells.map(cell => (cell.colNumber -> cell.value))
+
 }
