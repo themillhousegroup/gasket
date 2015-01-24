@@ -18,6 +18,7 @@ class RowSpec extends Specification with Mockito with TestHelpers with CellFeedT
     val mockCell = mock[Cell]
     mockCell.googleEntry returns mockEntry
     mockCell.colNumber returns column
+    mockCell.value returns s"$columnName $column"
     mockCell
   }
 
@@ -48,6 +49,18 @@ class RowSpec extends Specification with Mockito with TestHelpers with CellFeedT
     "return the cell at desired column" in {
       row.cellAt("C") must beSome(mockCell1)
       row.cellAt("F") must beSome(mockCell2)
+    }
+  }
+
+  "values" should {
+    "return a sequence of strings" in {
+      row.values must beEqualTo(Seq("C 3", "F 6"))
+    }
+  }
+
+  "columnValues" should {
+    "return a sequence of (Int, String) representing the column -> value" in {
+      row.columnValues must beEqualTo(Seq(3 -> "C 3", 6 -> "F 6"))
     }
   }
 }
