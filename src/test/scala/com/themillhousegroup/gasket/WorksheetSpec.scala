@@ -4,9 +4,10 @@ import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers, TestFixtures }
 import java.net.URL
-import com.google.gdata.data.spreadsheet.{ WorksheetEntry, CellFeed }
+import com.google.gdata.data.spreadsheet.{ ListEntry, WorksheetEntry, CellFeed }
 import org.specs2.specification.Scope
 import com.google.gdata.client.spreadsheet.SpreadsheetService
+import scala.concurrent.Future
 
 class WorksheetSpec extends Specification with Mockito with TestHelpers with CellFeedTestFixtures {
 
@@ -47,6 +48,31 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Cel
     "return an empty sequence if there are no rows in the worksheet" in new EmptyWorksheetScope {
       val headers = waitFor(w.headerLabels)
       headers must haveSize(0)
+    }
+  }
+
+  "Worksheet addRows function" should {
+
+    "return self if no rows are to be added" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val result = waitFor(w.addRows(Nil))
+      result must beEqualTo(w)
+    }
+
+    "call the underlying Google update function for each new row" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val threeNewRows = Seq(
+        Seq("foo" -> "1", "bar" -> "2"),
+        Seq("foo" -> "3", "bar" -> "4"),
+        Seq("foo" -> "5", "bar" -> "6")
+      )
+
+      val result = waitFor(w.addRows(threeNewRows))
+      result must beEqualTo(w)
+
+      there were three(mockService).insert(any[URL], any[ListEntry])
     }
   }
 }

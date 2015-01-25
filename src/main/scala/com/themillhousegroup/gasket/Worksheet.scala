@@ -1,7 +1,7 @@
 package com.themillhousegroup.gasket
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService
-import com.google.gdata.data.spreadsheet.{ CellFeed, WorksheetEntry }
+import com.google.gdata.data.spreadsheet.{ ListEntry, ListFeed, CellFeed, WorksheetEntry }
 import com.themillhousegroup.gasket.traits.{ Timing, ScalaEntry }
 import java.net.{ URL, URI }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,6 +14,9 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
   lazy private[this] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
   lazy private[this] val cellFeedBaseUrl = toUrl(cellFeedBaseUrlString)
   lazy private[this] val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
+
+  lazy private[this] val listFeedBaseUrlString = googleEntry.getListFeedUrl.toString
+  lazy private[this] val listFeedBaseUrl = toUrl(listFeedBaseUrlString)
 
   lazy val rowCount = googleEntry.getRowCount
   lazy val colCount = googleEntry.getColCount
@@ -78,6 +81,30 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
       cells.map { cell =>
         val column = cell.colNumber
         headers(column - 1) -> cell
+      }
+    }
+  }
+
+  /**
+   * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
+   * @param newRows a sequence of rows, where a row is a sequence of (headerLabel -> content) tuples
+   *
+   * @return a Future containing the new worksheet with the added rows
+   */
+  def addRows(newRows: Seq[Seq[(String, String)]]): Future[Worksheet] = {
+    Future {
+      newRows.foreach { newRow =>
+        val gRow = new ListEntry()
+        newRow.foreach { cell =>
+          gRow.getCustomElements.setValueLocal(cell._1, cell._2)
+        }
+        // Send the new row to the API for insertion. This blocks.
+        service.insert(listFeedBaseUrl, gRow)
+      }
+    }.flatMap { _ =>
+      // Finish by fetching "this sheet" from the remote end again:
+      parent.worksheets.map { sheetMap =>
+        sheetMap(title)
       }
     }
   }

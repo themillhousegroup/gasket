@@ -34,6 +34,8 @@ trait TestFixtures {
 
   val mockWorksheetEntry = mock[WorksheetEntry]
   mockWorksheetEntry.getCellFeedUrl returns fakeUrl
+  mockWorksheetEntry.getListFeedUrl returns fakeUrl
+  mockWorksheetEntry.getTitle returns new PlainTextConstruct("mockWorksheetEntry")
 
   val mockCellFeed = mock[CellFeed]
   val mockEmptyCellFeed = mock[CellFeed]
