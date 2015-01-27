@@ -21,7 +21,7 @@ import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSetting
 class ForComprehensionSpec extends Specification with GasketIntegrationSettings with TestHelpers {
 
   "For Comprehension example" should {
-    "get all nine cells" in {
+    "get all nine cells" in IntegrationScope { (username, password) =>
 
       val futureCells =
         for {
@@ -37,7 +37,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       result must haveSize(9)
     }
 
-    "get all nine cells as a Seq[String]" in {
+    "get all nine cells as a Seq[String]" in IntegrationScope { (username, password) =>
 
       val futureCellContents =
         for {
@@ -56,7 +56,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       result.last must beEqualTo("Bottom Right")
     }
 
-    "get all three rows" in {
+    "get all three rows" in IntegrationScope { (username, password) =>
 
       val futureRows =
         for {
@@ -72,7 +72,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       result must haveSize(3)
     }
 
-    "get a rectangular block of just the top-right 4 cells" in {
+    "get a rectangular block of just the top-right 4 cells" in IntegrationScope { (username, password) =>
 
       val futureRows =
         for {
@@ -91,7 +91,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
       blockRows.last.cells.last.value must beEqualTo("Center Right")
     }
 
-    "be able to iterate over the cells with their header labels in tuples" in {
+    "be able to iterate over the cells with their header labels in tuples" in IntegrationScope { (username, password) =>
 
       val futureTuples =
         for {

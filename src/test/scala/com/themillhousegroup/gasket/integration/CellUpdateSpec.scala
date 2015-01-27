@@ -21,7 +21,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
   val moddedValue = "MODIFIED"
 
   "Cell Update example" should {
-    "make a single change" in {
+    "make a single change" in IntegrationScope { (username, password) =>
 
       val futureCells =
         for {
@@ -51,7 +51,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
 
     }
 
-    "make a single change as part of a for-comprehension" in {
+    "make a single change as part of a for-comprehension" in IntegrationScope { (username, password) =>
 
       val futureCell =
         for {
