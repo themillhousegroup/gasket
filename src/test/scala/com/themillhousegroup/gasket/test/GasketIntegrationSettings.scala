@@ -27,9 +27,12 @@ trait GasketIntegrationSettings {
   lazy val maybeCredentials = if (credentialsFile.exists()) Some(credentialsFile) else None
 
   private def withFileIterator[T](f: File)(b: Iterator[String] => T): T = {
-    implicit val credentialsIterator = scala.io.Source.fromFile(f).getLines()
+    val src = scala.io.Source.fromFile(f)
+    implicit val credentialsIterator = src.getLines()
 
-    b(credentialsIterator)
+    val t = b(credentialsIterator)
+    src.close
+    t
   }
 
   private def readLine(target: String)(implicit credentialsIterator: Iterator[String]) = {
