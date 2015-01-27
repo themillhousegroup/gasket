@@ -135,6 +135,14 @@ That is, it performs the API call to update the remote spreadsheet, and returns 
    } yield newCell
 ```
 
+#### Adding a row to a Worksheet
+
+Again although `Worksheet` is immutable by design, it has an `addRows` method with the following signature:
+
+   ```def addRows(newRows: Seq[Seq[(String, String)]]): Future[Worksheet]```
+  
+The argument to this method is a sequence of rows, where a row is a sequence of `(columnHeaderName -> cellValue)` tuples. The new data is "played in" to the remote API, and then a new fresh `Worksheet` containing the new rows at the bottom is returned in the `Future`.
+
 Troubleshooting
 ===============
 
