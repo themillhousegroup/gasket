@@ -2,6 +2,9 @@ package com.themillhousegroup.gasket.test
 
 import scala.concurrent.duration.Duration
 import java.io.File
+import org.specs2.specification.Scope
+import org.specs2.execute.{ StandardResults, ResultLike, Result }
+import org.slf4j.LoggerFactory
 
 /**
  * Expects to be able to find a file at:
@@ -20,7 +23,8 @@ import java.io.File
  */
 trait GasketIntegrationSettings {
   lazy val homeDir = System.getProperty("user.home")
-  lazy val credentialsFile = new File(s"$homeDir/.gasket", ".credentials")
+  lazy val credentialsFile = new File(s"$homeDir/.gasket4", ".credentials")
+  lazy val maybeCredentials = if (credentialsFile.exists()) Some(credentialsFile) else None
 
   lazy val credentialsIterator = scala.io.Source.fromFile(credentialsFile).getLines()
 
@@ -35,4 +39,21 @@ trait GasketIntegrationSettings {
   lazy val username = readLine("username")
   lazy val password = readLine("password")
 
+  object IntegrationScope {
+    val skipMessage = "No Credentials in filesystem. Skipping integration test."
+    val log = LoggerFactory.getLogger(getClass)
+
+    def apply(block: => ResultLike): Scope = {
+      maybeCredentials.fold {
+        new Scope with StandardResults {
+          log.warn(skipMessage)
+          skipped(skipMessage)
+        }.asInstanceOf[Scope]
+      } { _ =>
+        new Scope {
+          block
+        }
+      }
+    }
+  }
 }

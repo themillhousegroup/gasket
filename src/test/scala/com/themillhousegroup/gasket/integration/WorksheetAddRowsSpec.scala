@@ -36,7 +36,7 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
 
   "Adding rows to worksheet" should {
 
-    "Modify the worksheet both locally and remotely" in {
+    "Modify the worksheet both locally and remotely" in IntegrationScope {
 
       val result = fetchSheetAndRows
 
