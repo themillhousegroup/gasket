@@ -23,12 +23,16 @@ import org.slf4j.LoggerFactory
  */
 trait GasketIntegrationSettings {
   lazy val homeDir = System.getProperty("user.home")
-  lazy val credentialsFile = new File(s"$homeDir/.gasket4", ".credentials")
+  lazy val credentialsFile = new File(s"$homeDir/.gasket", ".credentials")
   lazy val maybeCredentials = if (credentialsFile.exists()) Some(credentialsFile) else None
 
-  lazy val credentialsIterator = scala.io.Source.fromFile(credentialsFile).getLines()
+  private def withFileIterator[T](f: File)(b: Iterator[String] => T): T = {
+    implicit val credentialsIterator = scala.io.Source.fromFile(f).getLines()
 
-  private def readLine(target: String) = {
+    b(credentialsIterator)
+  }
+
+  private def readLine(target: String)(implicit credentialsIterator: Iterator[String]) = {
     if (!credentialsIterator.hasNext) {
       throw new IllegalStateException(s"couldn't find a line for $target")
     }
@@ -36,23 +40,27 @@ trait GasketIntegrationSettings {
     credentialsIterator.next
   }
 
-  lazy val username = readLine("username")
-  lazy val password = readLine("password")
-
   object IntegrationScope {
     val skipMessage = "No Credentials in filesystem. Skipping integration test."
     val log = LoggerFactory.getLogger(getClass)
 
-    def apply(block: => ResultLike): Scope = {
+    def apply(block: (String, String) => Result): Scope = {
       maybeCredentials.fold {
         new Scope with StandardResults {
           log.warn(skipMessage)
           skipped(skipMessage)
         }.asInstanceOf[Scope]
-      } { _ =>
-        new Scope {
-          block
+      } {
+        withFileIterator(_) { implicit it =>
+
+          lazy val username = readLine("username")
+          lazy val password = readLine("password")
+
+          new Scope {
+            block(username, password)
+          }
         }
+
       }
     }
   }

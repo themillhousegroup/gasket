@@ -21,7 +21,7 @@ import java.net.{ InetAddress, Inet4Address }
  */
 class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings with TestHelpers {
 
-  def fetchSheetAndRows: (Worksheet, Seq[Row]) = {
+  def fetchSheetAndRows(username: String, password: String): (Worksheet, Seq[Row]) = {
     val futureRows =
       for {
         acct <- Account(username, password)
@@ -36,9 +36,9 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
 
   "Adding rows to worksheet" should {
 
-    "Modify the worksheet both locally and remotely" in IntegrationScope {
+    "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
 
-      val result = fetchSheetAndRows
+      val result = fetchSheetAndRows(username, password)
 
       val numRows = result._2.size
       numRows must beGreaterThanOrEqualTo(1)
