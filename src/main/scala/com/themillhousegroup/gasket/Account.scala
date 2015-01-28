@@ -7,7 +7,9 @@ import com.themillhousegroup.gasket.traits.Timing
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Account extends AccountBuilder
+object Account extends AccountBuilder {
+  private[gasket] val SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full")
+}
 
 // Solely to allow a mocked SpreadsheetService for testing
 protected[this] class AccountBuilder {
@@ -21,8 +23,7 @@ protected[this] class AccountBuilder {
 }
 
 class Account(private[this] val service: SpreadsheetService) extends Timing {
-
-  private[this] val SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full")
+  import Account._
 
   private[this] lazy val spreadsheetFeed = service.getFeed(SPREADSHEET_FEED_URL, classOf[SpreadsheetFeed])
 
