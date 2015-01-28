@@ -108,4 +108,33 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
       }
     }
   }
+
+  /**
+   * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
+   *
+   * Each row you submit must have EXACTLY the same number of items as headerLabels!
+   *
+   * @param newRows a sequence of rows, where each row is a sequence of String values.
+   *
+   * @return a Future containing the new worksheet with the added rows
+   */
+  def addFullRows(newRows: Seq[Seq[String]]): Future[Worksheet] = {
+
+    headerLabels.flatMap { labels =>
+      val expectedSize = labels.size
+
+      // Check precondition: length of each row == expected:
+      val incorrectlySizedRows = newRows.filterNot(_.size == expectedSize)
+
+      if (!incorrectlySizedRows.isEmpty) {
+        Future.failed(new IllegalArgumentException(s"Rows: $incorrectlySizedRows were not of expected length $expectedSize"))
+      } else {
+        val zipped = newRows.map { newRow =>
+          labels.zip(newRow)
+        }
+
+        addRows(zipped)
+      }
+    }
+  }
 }
