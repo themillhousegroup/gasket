@@ -2,20 +2,26 @@ package com.themillhousegroup.gasket
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers, TestFixtures }
+import com.themillhousegroup.gasket.test.{ TestHelpers, TestFixtures }
 import java.net.URL
-import com.google.gdata.data.spreadsheet.{ ListEntry, WorksheetEntry, CellFeed }
-import org.specs2.specification.Scope
-import com.google.gdata.client.spreadsheet.SpreadsheetService
+import com.google.gdata.data.spreadsheet.{ WorksheetFeed, ListEntry, WorksheetEntry, CellFeed }
 import scala.concurrent.Future
+import scala.IllegalArgumentException
+import com.google.gdata.client.spreadsheet.SpreadsheetService
 
-class WorksheetSpec extends Specification with Mockito with TestHelpers with CellFeedTestFixtures {
+class WorksheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
-  class WorksheetScope extends Scope {
+  class WorksheetScope extends MockScope {
+    val mockService = mock[SpreadsheetService]
+
     val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
+
+    mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
   }
 
-  class EmptyWorksheetScope extends Scope {
+  class EmptyWorksheetScope extends MockScope {
+    val mockService = mock[SpreadsheetService]
+
     val mockEmptyWorksheetEntry = mock[WorksheetEntry]
     mockEmptyWorksheetEntry.getRowCount returns 0
 
@@ -70,6 +76,38 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Cel
       )
 
       val result = waitFor(w.addRows(threeNewRows))
+      result must beEqualTo(w)
+
+      there were three(mockService).insert(any[URL], any[ListEntry])
+    }
+  }
+
+  "Worksheet addFullRows function" should {
+
+    "return self if no rows are to be added" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val result = waitFor(w.addFullRows(Nil))
+      result must beEqualTo(w)
+    }
+
+    "Reject rows with incorrect number of elements" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val threeNewRows = Seq(Seq("1", "2"), Seq("3"), Seq("5", "6"))
+
+      waitFor(w.addFullRows(threeNewRows)) must throwAn[IllegalArgumentException].like {
+        case iae: IllegalArgumentException => iae.getMessage must beEqualTo("Rows: List(List(3)) were not of expected length 2")
+      }
+
+    }
+
+    "call the underlying Google update function for each new row" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val threeNewRows = Seq(Seq("1", "2"), Seq("3", "4"), Seq("5", "6"))
+
+      val result = waitFor(w.addFullRows(threeNewRows))
       result must beEqualTo(w)
 
       there were three(mockService).insert(any[URL], any[ListEntry])

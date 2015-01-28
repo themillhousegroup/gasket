@@ -1,12 +1,12 @@
 package com.themillhousegroup.gasket
 
-import com.themillhousegroup.gasket.test.{ CellFeedTestFixtures, TestHelpers }
+import com.themillhousegroup.gasket.test.TestHelpers
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import com.google.gdata.data.spreadsheet.CellEntry
 import com.google.gdata.data.TextConstruct
 
-class RowSpec extends Specification with Mockito with TestHelpers with CellFeedTestFixtures {
+class RowSpec extends Specification with Mockito with TestHelpers {
 
   def mockCellAt(column: Int, columnName: String) = {
     val mockTitle = mock[TextConstruct]
