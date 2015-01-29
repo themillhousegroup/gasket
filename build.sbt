@@ -21,6 +21,8 @@ resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/reposit
 
 jacoco.settings
 
+parallelExecution in Test := false
+
 seq(bintraySettings:_*)
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
