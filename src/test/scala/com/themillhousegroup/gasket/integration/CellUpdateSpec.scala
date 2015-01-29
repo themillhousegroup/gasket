@@ -7,7 +7,7 @@ import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSetting
 
 /**
  * For the purposes of these examples, there exists a spreadsheet
- * called "Example Spreadsheet" with worksheets, "CellUpdateSpec" and "CellUpdateSpec2".
+ * called "Example Spreadsheet" with worksheets, "Sheet2" and "Sheet3".
  * On each worksheet is 1 populated cell, with contents as follows:
  *
  *  Cell A1
@@ -28,7 +28,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("CellUpdateSpec").cells
+          cells <- ws("Sheet2").cells
         } yield cells
 
       val result = Await.result(futureCells, shortWait)
@@ -58,7 +58,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("CellUpdateSpec2").cells
+          cells <- ws("Sheet3").cells
           newCell <- cells.head.update(moddedValue)
         } yield newCell
 
@@ -69,7 +69,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("CellUpdateSpec2").cells
+          cells <- ws("Sheet3").cells
           newCell <- cells.head.update(defaultCellValue)
         } yield newCell
 

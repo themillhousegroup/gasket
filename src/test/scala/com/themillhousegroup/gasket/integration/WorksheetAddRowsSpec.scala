@@ -9,7 +9,7 @@ import java.net.{ InetAddress, Inet4Address }
 
 /**
  * For the purposes of these examples, there exists a spreadsheet
- * called "Example Spreadsheet" with worksheet, "WorksheetAddRowsSpec", that has
+ * called "Example Spreadsheet" with worksheet, "Sheet4", that has
  * column headers:
  * Timestamp | Hostname | Optional
  * This worksheet will get a row added to it each time this integration
@@ -33,7 +33,7 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
         acct <- Account(username, password)
         ss <- acct.spreadsheets
         ws <- ss("Example Spreadsheet").worksheets
-        sheet4 = ws("WorksheetAddRowsSpec")
+        sheet4 = ws("Sheet4")
         rows <- sheet4.rows
       } yield (sheet4, rows)
 

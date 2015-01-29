@@ -7,7 +7,7 @@ import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSetting
 
 /**
  * For the purposes of these examples, there exists a spreadsheet
- * called "Example Spreadsheet" with one worksheet, "ForComprehensionSpec".
+ * called "Example Spreadsheet" with one worksheet, "Sheet1".
  * On that worksheet are 9 populated cells, with contents as follows:
  *
  *  Top Left	    Top Middle	    Top Right
@@ -28,7 +28,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("ForComprehensionSpec").cells
+          cells <- ws("Sheet1").cells
         } yield cells
 
       val result = Await.result(futureCells, shortWait)
@@ -44,7 +44,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("ForComprehensionSpec").cells
+          cells <- ws("Sheet1").cells
           contents = cells.map(_.value)
         } yield contents
 
@@ -63,7 +63,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          rows <- ws("ForComprehensionSpec").rows
+          rows <- ws("Sheet1").rows
         } yield rows
 
       val result = Await.result(futureRows, shortWait)
@@ -79,7 +79,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          rows <- ws("ForComprehensionSpec").block(1 to 2, 2 to 3)
+          rows <- ws("Sheet1").block(1 to 2, 2 to 3)
         } yield rows
 
       val blockRows = Await.result(futureRows, shortWait)
@@ -98,7 +98,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          w = ws("ForComprehensionSpec")
+          w = ws("Sheet1")
           cells <- w.cells
           tuples <- w.withHeaderLabels(cells)
         } yield tuples
