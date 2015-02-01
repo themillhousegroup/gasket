@@ -86,6 +86,18 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
   }
 
   /**
+   * @return a Future holding the worksheet with all contents removed.
+   * The "clear" is accomplished by setting the number of rows to 0
+   * and updating the remote instance.
+   */
+  def clear: Future[Worksheet] = {
+    Future {
+      googleEntry.setRowCount(0)
+      googleEntry.update
+    }.flatMap(_ => refreshFromRemote)
+  }
+
+  /**
    * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
    * @param newRows a sequence of rows, where a row is a sequence of (headerLabel -> content) tuples
    *
@@ -103,9 +115,13 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
       }
     }.flatMap { _ =>
       // Finish by fetching "this sheet" from the remote end again:
-      parent.worksheets.map { sheetMap =>
-        sheetMap(title)
-      }
+      refreshFromRemote
+    }
+  }
+
+  private def refreshFromRemote: Future[Worksheet] = {
+    parent.worksheets.map { sheetMap =>
+      sheetMap(title)
     }
   }
 
