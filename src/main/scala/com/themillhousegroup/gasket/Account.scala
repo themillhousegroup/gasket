@@ -9,11 +9,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object Account extends AccountBuilder {
   private[gasket] val SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full")
+
+  override lazy val service = new SpreadsheetService("gasket")
+
 }
 
 // Solely to allow a mocked SpreadsheetService for testing
 protected[this] class AccountBuilder {
-  val service = new SpreadsheetService("gasket")
+  lazy val service = new SpreadsheetService("gasket")
 
   def apply(username: String, password: String): Future[Account] = Future {
 

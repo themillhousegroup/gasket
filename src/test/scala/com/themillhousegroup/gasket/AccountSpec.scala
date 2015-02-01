@@ -22,7 +22,7 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
     mockService.getFeed(any[URL], any[Class[IFeed]]) returns mockSpreadsheetFeed
 
     object TestAccount extends AccountBuilder {
-      override val service = mockService
+      override lazy val service = mockService
     }
 
     def gettingAccount(u: String = "good") = {
