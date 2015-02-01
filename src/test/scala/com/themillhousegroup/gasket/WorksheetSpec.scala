@@ -113,4 +113,23 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
       there were three(mockService).insert(any[URL], any[ListEntry])
     }
   }
+
+  "Worksheet clear function" should {
+
+    "return a future version of the current sheet" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val result = waitFor(w.clear)
+      result must beEqualTo(w)
+    }
+
+    "call the underlying Google update function" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val result = waitFor(w.clear)
+      result must beEqualTo(w)
+
+      there was one(mockWorksheetEntry).setRowCount(0)
+    }
+  }
 }
