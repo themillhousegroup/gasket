@@ -143,6 +143,12 @@ Again although `Worksheet` is immutable by design, it has an `addRows` method wi
   
 The argument to this method is a sequence of rows, where a row is a sequence of `(columnHeaderName -> cellValue)` tuples. The new data is "played in" to the remote API, and then a new fresh `Worksheet` containing the new rows at the bottom is returned in the `Future`.
 
+Still To Come
+===============
+ - More updating methods
+ - A Scala-idiomatic way of performing batched operations
+ - More performance
+
 Troubleshooting
 ===============
 
