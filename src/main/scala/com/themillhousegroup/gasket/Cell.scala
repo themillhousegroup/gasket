@@ -9,7 +9,14 @@ case class Cell(parent: Worksheet,
     val googleEntry: CellEntry,
     cellEntryCopyConstructor: (CellEntry) => CellEntry = Cell.copyConstructor) extends ScalaEntry[CellEntry] with Ordered[Cell] {
   lazy val value = googleEntry.getCell.getValue
+
+  /** A Cell's value is considered to be a None if it is empty or entirely whitespace */
+  lazy val valueOption = if (value.trim.isEmpty) None else Some(value)
+
   lazy val numericValue = googleEntry.getCell.getNumericValue
+
+  /** A Cell's value is considered to be a None if it is empty or entirely whitespace */
+  lazy val numericValueOption = valueOption.map(_ => numericValue)
 
   lazy val rowNumber = googleEntry.getCell.getRow
   lazy val colNumber = googleEntry.getCell.getCol
