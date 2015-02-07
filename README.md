@@ -71,7 +71,7 @@ Because many of the API calls can take hundreds of milliseconds to complete, the
 shown in the examples below.
 The way into the API is via the ```Account``` companion object, and the most useful class is probably ```Worksheet```,
 where the contents of a worksheet can be sliced-and-diced.
-
+All Gasket objects are immutable, but some offer an update method which will return a future version of itself after updating the remote spreadsheet.
 
 Examples
 ========
