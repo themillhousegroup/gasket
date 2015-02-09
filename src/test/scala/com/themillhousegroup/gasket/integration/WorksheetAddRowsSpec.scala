@@ -1,7 +1,8 @@
 package com.themillhousegroup.gasket.integration
 
 import org.specs2.mutable.Specification
-import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSettings }
+import com.themillhousegroup.gasket.test.{ ExampleSpreadsheetFetcher, TestHelpers, GasketIntegrationSettings }
+import ExampleSpreadsheetFetcher._
 import scala.concurrent.Await
 import com.themillhousegroup.gasket.{ Worksheet, Row, Account }
 import java.util.Date
@@ -27,24 +28,11 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
   isolated
   sequential
 
-  def fetchSheetAndRows(username: String, password: String): (Worksheet, Seq[Row]) = {
-    val futureRows =
-      for {
-        acct <- Account(username, password)
-        ss <- acct.spreadsheets
-        ws <- ss("Example Spreadsheet").worksheets
-        sheet4 = ws("Sheet4")
-        rows <- sheet4.rows
-      } yield (sheet4, rows)
-
-    Await.result(futureRows, shortWait)
-  }
-
   "Adding (partial) rows to worksheet" should {
 
     "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
 
-      val result = fetchSheetAndRows(username, password)
+      val result = fetchSheetAndRows(username, password, "Sheet4")
 
       val numRows = result._2.size
       numRows must beGreaterThanOrEqualTo(1)
@@ -68,7 +56,7 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
 
     "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
 
-      val result = fetchSheetAndRows(username, password)
+      val result = fetchSheetAndRows(username, password, "Sheet4")
 
       val numRows = result._2.size
       numRows must beGreaterThanOrEqualTo(1)
