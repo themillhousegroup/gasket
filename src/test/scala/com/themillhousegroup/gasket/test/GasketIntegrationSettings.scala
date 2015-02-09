@@ -5,6 +5,8 @@ import java.io.File
 import org.specs2.specification.Scope
 import org.specs2.execute.{ StandardResults, ResultLike, Result }
 import org.slf4j.LoggerFactory
+import com.themillhousegroup.gasket.{ Account, Row, Worksheet }
+import scala.concurrent.Await
 
 /**
  * Expects to be able to find a file at:
@@ -66,5 +68,22 @@ trait GasketIntegrationSettings {
 
       }
     }
+  }
+}
+
+object ExampleSpreadsheetFetcher extends TestHelpers {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def fetchSheetAndRows(username: String, password: String, sheetName: String): (Worksheet, Seq[Row]) = {
+    val futureRows =
+      for {
+        acct <- Account(username, password)
+        ss <- acct.spreadsheets
+        ws <- ss("Example Spreadsheet").worksheets
+        sheet = ws(sheetName)
+        rows <- sheet.rows
+      } yield (sheet, rows)
+
+    Await.result(futureRows, shortWait)
   }
 }
