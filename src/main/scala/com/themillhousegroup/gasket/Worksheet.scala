@@ -6,12 +6,9 @@ import com.themillhousegroup.gasket.traits.{ Timing, ScalaEntry }
 import java.net.{ URL, URI }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import com.themillhousegroup.gasket.Worksheet
-import com.themillhousegroup.gasket.Spreadsheet
-import com.themillhousegroup.gasket.Row
 import com.google.gdata.model.batch.BatchUtils
 import com.google.gdata.data.batch.BatchOperationType
-import com.google.gdata.model.atom.Link
+import scala.collection.JavaConverters._
 
 case class Worksheet(private val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
@@ -42,7 +39,6 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
 
   /** Cells are what actually make up the Worksheet; Rows are basically a view onto them */
   def cells: Future[Seq[Cell]] = Future {
-    import scala.collection.JavaConverters._
 
     time("cells fetch", cellFeed.getEntries).asScala.map(Cell(this, _))
   }
@@ -93,29 +89,16 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
   }
 
   /**
-   * @return a Future holding the worksheet with all contents removed.
-   * The "clear" is accomplished by deleting each cell in a batch operation.
+   * @return a Future holding the worksheet with all contents (i.e. everything except the header rows) removed.
+   * The "clear" is accomplished by setting the worksheet size to "1 row high"
+   * (the minimum permissible by the underlying API)
    */
   def clear: Future[Worksheet] = {
     Future {
-      clearNatively
-      //      clearByBatch
-    }.flatMap(_ => refreshFromRemote)
-  }
+      googleEntry.setRowCount(1)
 
-  private def clearNatively = {
-
-  }
-
-  private def clearByBatch = {
-    import scala.collection.JavaConverters._
-    val listEntries = listFeed.getEntries
-    listEntries.asScala.map { entry =>
-      BatchUtils.setBatchOperationType(entry, BatchOperationType.DELETE)
+      this.copy(googleEntry = googleEntry.update)
     }
-    listFeed.getEntries
-    //service.batch()
-
   }
 
   /**

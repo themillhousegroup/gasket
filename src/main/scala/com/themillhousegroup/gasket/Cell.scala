@@ -39,7 +39,7 @@ case class Cell(parent: Worksheet,
         val newEntry = cellEntryCopyConstructor(googleEntry)
         newEntry.changeInputValueLocal(newValue)
         val fromRemote = newEntry.update // Blocks
-        Cell(parent, fromRemote)
+        copy(googleEntry = fromRemote)
       }
     }
   }

@@ -9,4 +9,8 @@ trait ScalaEntry[T <: BaseEntry[T]] {
   lazy val title = googleEntry.getTitle.getPlainText
 
   override def toString = title
+
+  // Avoid precondition-failed problems based on the resource versioning used by Google:
+  //http://stackoverflow.com/questions/19006892/com-google-gdata-util-preconditionfailedexception-on-listentry-update-in-googl
+  googleEntry.setEtag("*")
 }

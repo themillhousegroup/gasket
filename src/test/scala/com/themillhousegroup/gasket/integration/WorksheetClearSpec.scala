@@ -3,7 +3,7 @@ package com.themillhousegroup.gasket.integration
 import org.specs2.mutable.Specification
 import com.themillhousegroup.gasket.test.{ ExampleSpreadsheetFetcher, TestHelpers, GasketIntegrationSettings }
 import ExampleSpreadsheetFetcher._
-import scala.concurrent.Await
+import scala.concurrent.{ Future, Await }
 import com.themillhousegroup.gasket.{ Worksheet, Row, Account }
 import java.util.Date
 import java.net.InetAddress
@@ -25,16 +25,13 @@ class WorksheetClearSpec extends Specification with GasketIntegrationSettings wi
   isolated
   sequential
 
-  // FIXME: Getting InvalidEntryException: : Bad Request when calling this.
-
   "Clearing a worksheet" should {
 
-    "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
+    "Modify the worksheet both locally and remotely, leaving header row intact" in IntegrationScope { (username, password) =>
 
       val result = fetchSheetAndRows(username, password, "Sheet5")
 
       val numRows = result._2.size
-      numRows must beGreaterThanOrEqualTo(1)
 
       val sheet = result._1
 
@@ -51,8 +48,9 @@ class WorksheetClearSpec extends Specification with GasketIntegrationSettings wi
 
       val clearedSheet = Await.result(newLocalSheet.clear, shortWait)
 
-      Await.result(clearedSheet.rows, shortWait).size must beEqualTo(0)
+      Await.result(clearedSheet.rows, shortWait).size must beEqualTo(1)
     }
+
   }
 
 }
