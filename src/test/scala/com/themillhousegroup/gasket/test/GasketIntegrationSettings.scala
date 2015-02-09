@@ -71,19 +71,4 @@ trait GasketIntegrationSettings {
   }
 }
 
-object ExampleSpreadsheetFetcher extends TestHelpers {
-  import scala.concurrent.ExecutionContext.Implicits.global
 
-  def fetchSheetAndRows(username: String, password: String, sheetName: String): (Worksheet, Seq[Row]) = {
-    val futureRows =
-      for {
-        acct <- Account(username, password)
-        ss <- acct.spreadsheets
-        ws <- ss("Example Spreadsheet").worksheets
-        sheet = ws(sheetName)
-        rows <- sheet.rows
-      } yield (sheet, rows)
-
-    Await.result(futureRows, shortWait)
-  }
-}

@@ -1,11 +1,17 @@
 package com.themillhousegroup.gasket
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService
-import com.google.gdata.data.spreadsheet.{ ListEntry, ListFeed, CellFeed, WorksheetEntry }
+import com.google.gdata.data.spreadsheet._
 import com.themillhousegroup.gasket.traits.{ Timing, ScalaEntry }
 import java.net.{ URL, URI }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import com.themillhousegroup.gasket.Worksheet
+import com.themillhousegroup.gasket.Spreadsheet
+import com.themillhousegroup.gasket.Row
+import com.google.gdata.model.batch.BatchUtils
+import com.google.gdata.data.batch.BatchOperationType
+import com.google.gdata.model.atom.Link
 
 case class Worksheet(private val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
@@ -17,6 +23,7 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
 
   lazy private[this] val listFeedBaseUrlString = googleEntry.getListFeedUrl.toString
   lazy private[this] val listFeedBaseUrl = toUrl(listFeedBaseUrlString)
+  lazy private[this] val listFeed = service.getFeed(listFeedBaseUrl, classOf[ListFeed])
 
   lazy val rowCount = googleEntry.getRowCount
   lazy val colCount = googleEntry.getColCount
@@ -87,14 +94,28 @@ case class Worksheet(private val service: SpreadsheetService, val parent: Spread
 
   /**
    * @return a Future holding the worksheet with all contents removed.
-   * The "clear" is accomplished by setting the number of rows to 0
-   * and updating the remote instance.
+   * The "clear" is accomplished by deleting each cell in a batch operation.
    */
   def clear: Future[Worksheet] = {
     Future {
-      googleEntry.setRowCount(0)
-      googleEntry.update
+      clearNatively
+      //      clearByBatch
     }.flatMap(_ => refreshFromRemote)
+  }
+
+  private def clearNatively = {
+
+  }
+
+  private def clearByBatch = {
+    import scala.collection.JavaConverters._
+    val listEntries = listFeed.getEntries
+    listEntries.asScala.map { entry =>
+      BatchUtils.setBatchOperationType(entry, BatchOperationType.DELETE)
+    }
+    listFeed.getEntries
+    //service.batch()
+
   }
 
   /**

@@ -4,6 +4,7 @@ import org.specs2.mutable.Specification
 import com.themillhousegroup.gasket.Account
 import scala.concurrent.Await
 import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSettings }
+import com.themillhousegroup.gasket.test.ExampleSpreadsheetFetcher._
 
 /**
  * For the purposes of these examples, there exists a spreadsheet
