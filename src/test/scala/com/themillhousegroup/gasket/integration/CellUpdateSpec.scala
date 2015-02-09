@@ -24,15 +24,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
   "Cell Update example" should {
     "make a single change" in IntegrationScope { (username, password) =>
 
-      val futureCells =
-        for {
-          acct <- Account(username, password)
-          ss <- acct.spreadsheets
-          ws <- ss("Example Spreadsheet").worksheets
-          cells <- ws("Sheet2").cells
-        } yield cells
-
-      val result = Await.result(futureCells, shortWait)
+      val result = fetchSheetAndCells(username, password, "Sheet2")._2
       result must not beEmpty
 
       result must haveSize(1)

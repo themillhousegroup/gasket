@@ -1,6 +1,6 @@
 package com.themillhousegroup.gasket.test
 
-import com.themillhousegroup.gasket.{Account, Row, Worksheet}
+import com.themillhousegroup.gasket.{ Cell, Account, Row, Worksheet }
 import scala.concurrent.Await
 
 object ExampleSpreadsheetFetcher extends TestHelpers {
@@ -21,7 +21,7 @@ object ExampleSpreadsheetFetcher extends TestHelpers {
     Await.result(futureRows, shortWait)
   }
 
-  def fetchSheetAndCells(username: String, password: String, sheetName: String): (Worksheet, Seq[Row]) = {
+  def fetchSheetAndCells(username: String, password: String, sheetName: String): (Worksheet, Seq[Cell]) = {
     val futureCells =
       for {
         acct <- Account(username, password)

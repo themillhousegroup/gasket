@@ -71,4 +71,3 @@ trait GasketIntegrationSettings {
   }
 }
 
-
