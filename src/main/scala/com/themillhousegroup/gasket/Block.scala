@@ -2,6 +2,13 @@ package com.themillhousegroup.gasket
 
 import scala.concurrent.Future
 
+/**
+ * Represents a rectangular area of a Worksheet that has already
+ * been fetched from the remote API.
+ *
+ * Operations on a Block will be performed using the Google API's
+ * batching mechanism for improved performance over single-Cell updates.
+ */
 case class Block(parent:Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
   lazy val minRow = cells.head.rowNumber
@@ -18,5 +25,11 @@ case class Block(parent:Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     */
   def update(newValues:Seq[String]):Future[Block] = {
     Future.successful(this)
+  }
+
+  def rows:Seq[Row] = {
+    cells.grouped(width).map { cRow =>
+      Row(cRow.head.rowNumber, cRow)
+    }.toSeq
   }
 }
