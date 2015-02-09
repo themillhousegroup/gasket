@@ -24,7 +24,12 @@ case class Block(parent:Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     * the same as the original `cells` sequence.
     */
   def update(newValues:Seq[String]):Future[Block] = {
-    Future.successful(this)
+    if (newValues.size != cells.size) {
+      Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
+    } else {
+      // TODO: Update the remote sheet using the Batch API
+      Future.successful(this)
+    }
   }
 
   def rows:Seq[Row] = {
