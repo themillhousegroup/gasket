@@ -10,17 +10,16 @@ import com.google.gdata.model.batch.BatchUtils
 import com.google.gdata.data.batch.BatchOperationType
 import scala.collection.JavaConverters._
 
-case class Worksheet(private val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
+case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
   private def toUrl(s: String): URL = new URI(s).toURL
 
   lazy private[this] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
   lazy private[this] val cellFeedBaseUrl = toUrl(cellFeedBaseUrlString)
-  lazy private[this] val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
+  lazy private[gasket] val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
 
   lazy private[this] val listFeedBaseUrlString = googleEntry.getListFeedUrl.toString
   lazy private[this] val listFeedBaseUrl = toUrl(listFeedBaseUrlString)
-  lazy private[this] val listFeed = service.getFeed(listFeedBaseUrl, classOf[ListFeed])
 
   lazy val rowCount = googleEntry.getRowCount
   lazy val colCount = googleEntry.getColCount
