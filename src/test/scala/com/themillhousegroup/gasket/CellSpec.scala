@@ -59,7 +59,7 @@ class CellSpec extends Specification with Mockito with TestHelpers with TestFixt
       fakeCell.valueOption must beNone
     }
 
-    "Consider a populated string as a None in valueOption" in new CellScope {
+    "Consider a populated string as a Some in valueOption" in new CellScope {
       val cellEntry = mockCellEntry(1, 2, Some("foo"))
 
       val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
@@ -75,5 +75,12 @@ class CellSpec extends Specification with Mockito with TestHelpers with TestFixt
       fakeCell.numericValueOption must beNone
     }
 
+    "Consider a populated string as a Some in numericValueOption" in new CellScope {
+      val cellEntry = mockCellEntry(1, 2, Some("99"), Some(99))
+
+      val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
+
+      fakeCell.numericValueOption must beSome(99)
+    }
   }
 }
