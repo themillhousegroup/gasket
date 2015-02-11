@@ -11,14 +11,14 @@ import org.specs2.specification.Scope
 trait TestFixtures {
   this: Mockito =>
 
-  def mockCellEntry(row: Int, col: Int) = {
+  def mockCellEntry(row: Int, col: Int, cellValue: Option[String] = None) = {
     val ce = mock[CellEntry]
     ce.getTitle returns new PlainTextConstruct(s"row$row, col$col")
     val c = mock[Cell]
     ce.getCell returns c
     c.getCol returns col
     c.getRow returns row
-    c.getValue returns s"R${row}C${col}"
+    c.getValue returns cellValue.getOrElse(s"R${row}C${col}")
     ce
   }
 
