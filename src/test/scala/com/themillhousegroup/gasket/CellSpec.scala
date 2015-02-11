@@ -21,20 +21,59 @@ class CellSpec extends Specification with Mockito with TestHelpers with TestFixt
     newCE
   }
 
-  "Should return self if updating a cell to its current value" in new CellScope {
-    val fCells = w.cells
+  "Cell update" should {
 
-    val cells = waitFor(fCells)
-    val firstCell = cells.head
-    val content = firstCell.value
-    waitFor(firstCell.update(content)) must beEqualTo(firstCell)
+    "Return self if updating a cell to its current value" in new CellScope {
+      val fCells = w.cells
+
+      val cells = waitFor(fCells)
+      val firstCell = cells.head
+      val content = firstCell.value
+      waitFor(firstCell.update(content)) must beEqualTo(firstCell)
+    }
+
+    "Allow update by returning a Future version containing the new value" in new CellScope {
+
+      val fakeCell = Cell(w, c1, mockCopyConstructor)
+      val content = fakeCell.value
+
+      waitFor(fakeCell.update(content + "-modified")) must not be equalTo(fakeCell)
+    }
   }
 
-  "Should allow update by returning a Future version containing the new value" in new CellScope {
+  "Field access" should {
 
-    val fakeCell = Cell(w, c1, mockCopyConstructor)
-    val content = fakeCell.value
+    "Consider an empty string as a None in valueOption" in new CellScope {
+      val cellEntry = mockCellEntry(1, 2, Some(""))
 
-    waitFor(fakeCell.update(content + "-modified")) must not be equalTo(fakeCell)
+      val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
+
+      fakeCell.valueOption must beNone
+    }
+
+    "Consider a whitespace-only string as a None in valueOption" in new CellScope {
+      val cellEntry = mockCellEntry(1, 2, Some("   "))
+
+      val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
+
+      fakeCell.valueOption must beNone
+    }
+
+    "Consider a populated string as a None in valueOption" in new CellScope {
+      val cellEntry = mockCellEntry(1, 2, Some("foo"))
+
+      val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
+
+      fakeCell.valueOption must beSome("foo")
+    }
+
+    "Consider an empty string as a None in numericValueOption" in new CellScope {
+      val cellEntry = mockCellEntry(1, 2, Some(""))
+
+      val fakeCell = Cell(w, cellEntry, mockCopyConstructor)
+
+      fakeCell.numericValueOption must beNone
+    }
+
   }
 }
