@@ -1,6 +1,10 @@
 package com.themillhousegroup.gasket
 
 import scala.concurrent.Future
+import com.google.gdata.model.atom.Link
+import java.net.URL
+import com.google.gdata.data.spreadsheet.{ CellEntry, CellFeed }
+import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
 
 /**
  * Represents a rectangular area of a Worksheet that has already
@@ -8,22 +12,25 @@ import scala.concurrent.Future
  *
  * Operations on a Block will be performed using the Google API's
  * batching mechanism for improved performance over single-Cell updates.
+ *
+ *
  */
-case class Block(parent:Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
+case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
   lazy val minRow = cells.head.rowNumber
   lazy val minColumn = cells.head.colNumber
 
-  lazy val width =  cells.last.colNumber - minColumn
-  lazy val height =  cells.last.rowNumber - minRow
+  lazy val width = cells.last.colNumber - minColumn
+  lazy val height = cells.last.rowNumber - minRow
 
   def compare(that: Block): Int = this.minRow - that.minRow
 
-  /** A new value must be provided for each cell in the block,
-    * even if it's unchanged. The length of `newValues` must be
-    * the same as the original `cells` sequence.
-    */
-  def update(newValues:Seq[String]):Future[Block] = {
+  /**
+   * A new value must be provided for each cell in the block,
+   * even if it's unchanged. The length of `newValues` must be
+   * the same as the original `cells` sequence.
+   */
+  def update(newValues: Seq[String]): Future[Block] = {
     if (newValues.size != cells.size) {
       Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
     } else {
@@ -32,9 +39,44 @@ case class Block(parent:Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     }
   }
 
-  def rows:Seq[Row] = {
+  def rows: Seq[Row] = {
     cells.grouped(width).map { cRow =>
       Row(cRow.head.rowNumber, cRow)
     }.toSeq
+  }
+
+  private object BatchSender {
+
+    // FIXME: Google API documentation is out of sync with code here.
+    // Find out how to get the "batch link" url
+    // lazy val batchLink = parent.cellFeed.g.getLink(Link.REL.FEED_BATCH, Link.Type.ATOM)
+    lazy val batchLink = parent.cellFeed.getLink("fix", "me")
+
+    private def sendBatchRequest(batchRequest: CellFeed) = {
+      val batchResponseCellFeed = parent.service.batch(new URL(batchLink.getHref), batchRequest)
+      Future.successful(Seq[Cell]())
+    }
+
+    private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+      val batchRequestCellFeed = new CellFeed()
+
+      cellsWithTheirNewValues.foreach {
+        case (cell, newValue) =>
+          val batchEntry = new CellEntry()
+          // TODO continue ripping from https://developers.google.com/google-apps/spreadsheets/#updating_multiple_cells_with_a_batch_request
+          // Work out equivalent for: new CellEntry(cellEntries.get(cell.idString))
+          batchEntry.changeInputValueLocal(newValue)
+          BatchUtils.setBatchId(batchEntry, cell.idString)
+          BatchUtils.setBatchOperationType(batchEntry, BatchOperationType.UPDATE)
+          batchRequestCellFeed.getEntries().add(batchEntry)
+      }
+      batchRequestCellFeed
+    }
+
+    def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
+      val cellsWithTheirNewValues = cells.zip(newValues)
+      val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
+      sendBatchRequest(batchRequest)
+    }
   }
 }

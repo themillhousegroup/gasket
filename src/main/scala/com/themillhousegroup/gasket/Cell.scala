@@ -21,7 +21,10 @@ case class Cell(parent: Worksheet,
   lazy val rowNumber = googleEntry.getCell.getRow
   lazy val colNumber = googleEntry.getCell.getCol
 
-  override def toString = s"[R${rowNumber}C${colNumber}]: $value"
+  override def toString = s"[$idString]: $value"
+
+  /** Useful for batched operations; see Block.scala */
+  private[gasket] lazy val idString = s"R${rowNumber}C${colNumber}"
 
   def compare(that: Cell): Int = this.colNumber - that.colNumber
 
