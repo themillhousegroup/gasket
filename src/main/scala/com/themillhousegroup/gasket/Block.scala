@@ -1,7 +1,7 @@
 package com.themillhousegroup.gasket
 
 import scala.concurrent.Future
-import com.google.gdata.model.atom.Link
+import com.google.gdata.data.Link
 import java.net.URL
 import com.google.gdata.data.spreadsheet.{ CellEntry, CellFeed }
 import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
@@ -47,10 +47,8 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
   private object BatchSender {
 
-    // FIXME: Google API documentation is out of sync with code here.
-    // Find out how to get the "batch link" url
-    // lazy val batchLink = parent.cellFeed.g.getLink(Link.REL.FEED_BATCH, Link.Type.ATOM)
-    lazy val batchLink = parent.cellFeed.getLink("fix", "me")
+    import com.google.gdata.data.ILink._
+    lazy val batchLink = parent.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
     private def sendBatchRequest(batchRequest: CellFeed) = {
       val batchResponseCellFeed = parent.service.batch(new URL(batchLink.getHref), batchRequest)
