@@ -5,7 +5,7 @@ import com.google.gdata.data.Link
 import java.net.URL
 import com.google.gdata.data.spreadsheet.{ CellEntry, CellFeed }
 import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Represents a rectangular area of a Worksheet that has already
@@ -52,10 +52,10 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     import com.google.gdata.data.ILink._
     lazy val batchLink = parent.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
-    private def sendBatchRequest(batchRequest: CellFeed):Future[Seq[Cell]] = {
-      Future (parent.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
+    private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
+      Future(parent.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
         val responseEntries = batchResponseCellFeed.getEntries.asScala
-        val failures = responseEntries.filter (!BatchUtils.isSuccess(_)).map (BatchUtils.getBatchStatus(_))
+        val failures = responseEntries.filter(!BatchUtils.isSuccess(_)).map(BatchUtils.getBatchStatus(_))
 
         if (failures.isEmpty) {
           responseEntries.map(Cell(parent, _))
