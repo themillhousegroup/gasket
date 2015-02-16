@@ -6,6 +6,7 @@ import java.net.URL
 import com.google.gdata.data.spreadsheet.{ CellEntry, CellFeed }
 import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
 
+
 /**
  * Represents a rectangular area of a Worksheet that has already
  * been fetched from the remote API.
@@ -46,13 +47,22 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
   }
 
   private object BatchSender {
+    import scala.collection.JavaConverters._
 
     import com.google.gdata.data.ILink._
     lazy val batchLink = parent.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
-    private def sendBatchRequest(batchRequest: CellFeed) = {
-      val batchResponseCellFeed = parent.service.batch(new URL(batchLink.getHref), batchRequest)
-      Future.successful(Seq[Cell]())
+    private def sendBatchRequest(batchRequest: CellFeed):Future[Seq[Cell]] = {
+      Future (parent.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
+        val responseEntries = batchResponseCellFeed.getEntries.asScala
+        val failures = responseEntries.filter (!BatchUtils.isSuccess(_)).map (BatchUtils.getBatchStatus(_))
+
+        if (failures.isEmpty) {
+          responseEntries.map(Cell(parent, _))
+        } else {
+          throw new IllegalStateException(s"Batch request failed: ${failures.head.getReason}")
+        }
+      }
     }
 
     private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
@@ -60,9 +70,7 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
       cellsWithTheirNewValues.foreach {
         case (cell, newValue) =>
-          val batchEntry = new CellEntry()
-          // TODO continue ripping from https://developers.google.com/google-apps/spreadsheets/#updating_multiple_cells_with_a_batch_request
-          // Work out equivalent for: new CellEntry(cellEntries.get(cell.idString))
+          val batchEntry = new CellEntry(cell.googleEntry)
           batchEntry.changeInputValueLocal(newValue)
           BatchUtils.setBatchId(batchEntry, cell.idString)
           BatchUtils.setBatchOperationType(batchEntry, BatchOperationType.UPDATE)
