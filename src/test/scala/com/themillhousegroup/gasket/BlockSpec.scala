@@ -9,10 +9,19 @@ import java.net.URL
 
 class BlockSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
+  val worksheet = mock[Worksheet]
+
+  class BlockScope extends MockScope {
+    val mockService = mock[SpreadsheetService]
+  }
+
   "Rows function" should {
 
-    "be able to split a rectangular seq of cells into its component rows" in {
-
+    "be able to split a rectangular seq of cells into its component rows" in new BlockScope {
+      val twoRows = Seq(c1, c2, c3, c4).map(Cell(worksheet, _))
+      val block = Block(worksheet, twoRows)
+      val rows = block.rows
+      rows must haveSize(2)
     }
   }
 }
