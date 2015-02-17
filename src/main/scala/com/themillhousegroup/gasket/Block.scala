@@ -35,8 +35,9 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     if (newValues.size != cells.size) {
       Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
     } else {
-      // TODO: Update the remote sheet using the Batch API
-      Future.successful(this)
+      BatchSender.sendBatchUpdate(cells, newValues).map { updatedCells =>
+        this.copy(cells = updatedCells)
+      }
     }
   }
 
