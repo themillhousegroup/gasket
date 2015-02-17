@@ -21,8 +21,8 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
   lazy val minRow = cells.head.rowNumber
   lazy val minColumn = cells.head.colNumber
 
-  lazy val width = cells.last.colNumber - minColumn
-  lazy val height = cells.last.rowNumber - minRow
+  lazy val width = (cells.last.colNumber - minColumn) + 1
+  lazy val height = (cells.last.rowNumber - minRow) + 1
 
   def compare(that: Block): Int = this.minRow - that.minRow
 
@@ -43,6 +43,7 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
   def rows: Seq[Row] = {
     cells.grouped(width).map { cRow =>
+      println(s"cRows ($width): $cRow")
       Row(cRow.head.rowNumber, cRow)
     }.toSeq
   }
