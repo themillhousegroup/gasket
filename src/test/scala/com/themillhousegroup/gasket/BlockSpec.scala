@@ -35,7 +35,10 @@ class BlockSpec extends Specification with Mockito with TestHelpers with TestFix
   "Update function" should {
 
     "Reject a sequence of new values that is incorrectly size" in new MockSpreadsheetScope {
+      val twoRows = Seq(c1, c2, c3, c4).map(Cell(worksheet, _))
+      val block = Block(worksheet, twoRows)
 
+      waitFor(block.update(Seq())) must throwAn[IllegalArgumentException]
     }
   }
 }
