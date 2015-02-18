@@ -17,10 +17,21 @@ class BlockSpec extends Specification with Mockito with TestHelpers with TestFix
 
   "Rows function" should {
 
+    "be able to split a single-rowed sequence into a single row" in new BlockScope {
+      val oneRow = Seq(c1, c2).map(Cell(worksheet, _))
+      val block = Block(worksheet, oneRow)
+      val rows = block.rows
+
+      block.minRow must beEqualTo(1)
+      rows must haveSize(1)
+    }
+
     "be able to split a rectangular seq of cells into its component rows" in new BlockScope {
       val twoRows = Seq(c1, c2, c3, c4).map(Cell(worksheet, _))
       val block = Block(worksheet, twoRows)
       val rows = block.rows
+
+      block.height must beEqualTo(2)
       rows must haveSize(2)
     }
   }
