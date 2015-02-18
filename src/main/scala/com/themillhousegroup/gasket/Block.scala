@@ -43,7 +43,6 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
   def rows: Seq[Row] = {
     cells.grouped(width).map { cRow =>
-      println(s"cRows ($width): $cRow")
       Row(cRow.head.rowNumber, cRow)
     }.toSeq
   }
