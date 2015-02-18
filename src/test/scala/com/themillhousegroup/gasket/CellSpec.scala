@@ -9,8 +9,7 @@ import java.net.URL
 
 class CellSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
-  class CellScope extends MockScope {
-    val mockService = mock[SpreadsheetService]
+  trait CellScope extends MockSpreadsheetScope {
     val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
     mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
   }

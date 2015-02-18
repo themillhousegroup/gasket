@@ -9,11 +9,8 @@ import java.net.URL
 
 class SpreadsheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
-  class SpreadsheetScope extends MockScope {
-    val mockService = mock[SpreadsheetService]
-
+  trait SpreadsheetScope extends MockSpreadsheetScope {
     mockService.getFeed(any[URL], any[Class[WorksheetFeed]]) returns mockWorksheetFeed
-
   }
 
   "Spreadsheet" should {

@@ -11,16 +11,14 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService
 
 class WorksheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
-  class WorksheetScope extends MockScope {
-    val mockService = mock[SpreadsheetService]
+  trait WorksheetScope extends MockSpreadsheetScope {
 
     val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
 
     mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
   }
 
-  class EmptyWorksheetScope extends MockScope {
-    val mockService = mock[SpreadsheetService]
+  trait EmptyWorksheetScope extends MockSpreadsheetScope {
 
     val mockEmptyWorksheetEntry = mock[WorksheetEntry]
     mockEmptyWorksheetEntry.getRowCount returns 0

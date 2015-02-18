@@ -67,4 +67,8 @@ trait TestFixtures {
     val mockSpreadsheet = mock[Spreadsheet]
     val mockService: SpreadsheetService // Must be instantiated by subclasses
   }
+
+  trait MockSpreadsheetScope extends MockScope {
+    val mockService = mock[SpreadsheetService]
+  }
 }
