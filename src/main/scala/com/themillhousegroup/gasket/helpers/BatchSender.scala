@@ -11,24 +11,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BatchSender {
 
-  val parent: Worksheet
+  val worksheet: Worksheet
 
-  lazy val batchLink = parent.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
+  lazy val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
   private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
-    Future(parent.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
+    Future(worksheet.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
       val responseEntries = batchResponseCellFeed.getEntries.asScala
       val failures = responseEntries.filter(!BatchUtils.isSuccess(_)).map(BatchUtils.getBatchStatus(_))
 
       if (failures.isEmpty) {
-        responseEntries.map(Cell(parent, _))
+        responseEntries.map(Cell(worksheet, _))
       } else {
         throw new IllegalStateException(s"Batch request failed: ${failures.head.getReason}")
       }
     }
   }
 
-  private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+  private def buildBatchRequest(cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
     val batchRequestCellFeed = new CellFeed()
 
     cellsWithTheirNewValues.foreach {
@@ -36,10 +36,25 @@ trait BatchSender {
         val batchEntry = new CellEntry(cell.googleEntry)
         batchEntry.changeInputValueLocal(newValue)
         BatchUtils.setBatchId(batchEntry, cell.idString)
-        BatchUtils.setBatchOperationType(batchEntry, BatchOperationType.UPDATE)
+        BatchUtils.setBatchOperationType(batchEntry, op)
         batchRequestCellFeed.getEntries().add(batchEntry)
     }
     batchRequestCellFeed
+  }
+
+  private def buildBatchInsertRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+    buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.INSERT)
+  }
+
+  private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+    buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.UPDATE)
+
+  }
+
+  def sendBatchInsert(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
+    val cellsWithTheirNewValues = cells.zip(newValues)
+    val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
+    sendBatchRequest(batchRequest)
   }
 
   def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {

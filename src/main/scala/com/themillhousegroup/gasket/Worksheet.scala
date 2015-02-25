@@ -101,7 +101,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
   }
 
   /**
-   * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
+   * Adds additional rows to the bottom of the worksheet. Does NOT mutate the current Worksheet object!
    * @param newRows a sequence of rows, where a row is a sequence of (headerLabel -> content) tuples
    *
    * WARNING this is NOT a batched-up operation!
@@ -133,7 +133,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
   }
 
   /**
-   * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
+   * Adds additional rows to the bottom of the worksheet. Does not mutate the current Worksheet object!
    *
    * Each row you submit must have EXACTLY the same number of items as headerLabels!
    *

@@ -17,7 +17,7 @@ import com.themillhousegroup.gasket.helpers.BatchSender
  *
  *
  */
-case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] with BatchSender {
+case class Block(val worksheet: Worksheet, cells: Seq[Cell]) extends Ordered[Block] with BatchSender {
 
   lazy val minRow = cells.head.rowNumber
   lazy val minColumn = cells.head.colNumber
