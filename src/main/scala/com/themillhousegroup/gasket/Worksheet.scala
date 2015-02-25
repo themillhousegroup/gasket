@@ -103,6 +103,36 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
   }
 
   /**
+   * Adds a single row to the bottom of the worksheet. Does NOT mutate the current Worksheet object!
+   * @param newRow a sequence of string values representing the cell contents of the new row
+   *
+   * WARNING this is NOT a batched-up operation, and it's not particularly fast.
+   * If you have multiple rows to add, rather than calling this method in some kind of loop,
+   * please consider using addRows() which uses a batch mechanism to improve update performance.
+   *
+   * @return a Future containing the new worksheet with the added row
+   */
+  def addRow(newRow: Seq[String]): Future[Worksheet] = {
+    headerLabels.map { labels =>
+      if (newRow.size != labels.size) {
+        Future.failed(new IllegalArgumentException(s"Row: $newRow was not of expected length ${labels.size}"))
+      } else {
+        val zippedRow = labels.zip(newRow)
+
+        val gRow = new ListEntry()
+        zippedRow.foreach { cell =>
+          gRow.getCustomElements.setValueLocal(cell._1, cell._2)
+        }
+        // Send the new row to the API for insertion. This blocks.
+        service.insert(listFeedBaseUrl, gRow)
+      }
+    }.flatMap { _ =>
+      // Finish by fetching "this sheet" from the remote end again:
+      refreshFromRemote
+    }
+  }
+
+  /**
    * Adds additional rows to the bottom of the worksheet. Does NOT mutate the current Worksheet object!
    *
    * For performance, this is a batched operation. The "official" way to add rows is one-at-a-time
