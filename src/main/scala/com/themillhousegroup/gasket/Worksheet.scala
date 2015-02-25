@@ -104,7 +104,11 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
    * Adds additional rows to the bottom of the worksheet. Does not mutate the current sheet!
    * @param newRows a sequence of rows, where a row is a sequence of (headerLabel -> content) tuples
    *
-   * @return a Future containing the new worksheet with the added rows
+   * WARNING this is NOT a batched-up operation!
+   * If it is possible that you will be adding more than a couple of rows, please strongly consider
+   * using the methods in Block!
+   *
+   *@return a Future containing the new worksheet with the added rows
    */
   def addRows(newRows: Seq[Seq[(String, String)]]): Future[Worksheet] = {
     Future {
