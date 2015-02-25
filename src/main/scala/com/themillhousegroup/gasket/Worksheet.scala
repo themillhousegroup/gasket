@@ -108,7 +108,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
    * If it is possible that you will be adding more than a couple of rows, please strongly consider
    * using the methods in Block!
    *
-   *@return a Future containing the new worksheet with the added rows
+   * @return a Future containing the new worksheet with the added rows
    */
   def addRows(newRows: Seq[Seq[(String, String)]]): Future[Worksheet] = {
     Future {

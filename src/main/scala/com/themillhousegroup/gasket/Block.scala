@@ -6,6 +6,7 @@ import java.net.URL
 import com.google.gdata.data.spreadsheet.{ CellEntry, CellFeed }
 import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.themillhousegroup.gasket.helpers.BatchSender
 
 /**
  * Represents a rectangular area of a Worksheet that has already
@@ -16,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  *
  *
  */
-case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
+case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] with BatchSender {
 
   lazy val minRow = cells.head.rowNumber
   lazy val minColumn = cells.head.colNumber
@@ -35,7 +36,7 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     if (newValues.size != cells.size) {
       Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
     } else {
-      BatchSender.sendBatchUpdate(cells, newValues).map { updatedCells =>
+      sendBatchUpdate(cells, newValues).map { updatedCells =>
         this.copy(cells = updatedCells)
       }
     }
@@ -47,43 +48,4 @@ case class Block(parent: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
     }.toSeq
   }
 
-  private object BatchSender {
-    import scala.collection.JavaConverters._
-
-    import com.google.gdata.data.ILink._
-    lazy val batchLink = parent.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
-
-    private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
-      Future(parent.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
-        val responseEntries = batchResponseCellFeed.getEntries.asScala
-        val failures = responseEntries.filter(!BatchUtils.isSuccess(_)).map(BatchUtils.getBatchStatus(_))
-
-        if (failures.isEmpty) {
-          responseEntries.map(Cell(parent, _))
-        } else {
-          throw new IllegalStateException(s"Batch request failed: ${failures.head.getReason}")
-        }
-      }
-    }
-
-    private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
-      val batchRequestCellFeed = new CellFeed()
-
-      cellsWithTheirNewValues.foreach {
-        case (cell, newValue) =>
-          val batchEntry = new CellEntry(cell.googleEntry)
-          batchEntry.changeInputValueLocal(newValue)
-          BatchUtils.setBatchId(batchEntry, cell.idString)
-          BatchUtils.setBatchOperationType(batchEntry, BatchOperationType.UPDATE)
-          batchRequestCellFeed.getEntries().add(batchEntry)
-      }
-      batchRequestCellFeed
-    }
-
-    def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
-      val cellsWithTheirNewValues = cells.zip(newValues)
-      val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
-      sendBatchRequest(batchRequest)
-    }
-  }
 }
