@@ -9,9 +9,11 @@ import scala.concurrent.Future
 import com.google.gdata.model.batch.BatchUtils
 import com.google.gdata.data.batch.BatchOperationType
 import scala.collection.JavaConverters._
+import com.themillhousegroup.gasket.helpers.BatchSender
 
-case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
+case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with BatchSender with Timing {
 
+  val worksheet = this
   private def toUrl(s: String): URL = new URI(s).toURL
 
   lazy private[this] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
@@ -102,26 +104,40 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
 
   /**
    * Adds additional rows to the bottom of the worksheet. Does NOT mutate the current Worksheet object!
-   * @param newRows a sequence of rows, where a row is a sequence of (headerLabel -> content) tuples
    *
-   * WARNING this is NOT a batched-up operation!
-   * If it is possible that you will be adding more than a couple of rows, please strongly consider
-   * using the methods in Block!
+   * For performance, this is a batched operation. The "official" way to add rows is one-at-a-time
+   * which gives unacceptable performance for anything more than a couple of rows.
    *
    * @return a Future containing the new worksheet with the added rows
    */
-  def addRows(newRows: Seq[Seq[(String, String)]]): Future[Worksheet] = {
-    Future {
-      newRows.foreach { newRow =>
-        val gRow = new ListEntry()
-        newRow.foreach { cell =>
-          gRow.getCustomElements.setValueLocal(cell._1, cell._2)
-        }
-        // Send the new row to the API for insertion. This blocks.
-        service.insert(listFeedBaseUrl, gRow)
-      }
+  def addRows(newRows: Seq[Seq[String]]): Future[Worksheet] = {
+    def cellsInNewArea(allCells: Seq[Cell], previousMaxRow: Int) = Future.successful {
+      println(s"Sheet has ${allCells.size} cells")
+      println(s"I will consider a cell new if it is rowNumber > $previousMaxRow")
+      val filtered = allCells.filter(_.rowNumber > previousMaxRow)
+      println(s"Came up with $filtered")
+      filtered
+    }
+
+    cells.map { cls =>
+
+      val previousMaxRow = cls.lastOption.map(_.rowNumber).getOrElse(1)
+      val newRowsNeeded = newRows.size
+
+      println(s"Need ${previousMaxRow + newRowsNeeded} total rows")
+
+      // Expand the remote sheet
+      googleEntry.setRowCount(previousMaxRow + newRowsNeeded)
+      googleEntry.update
+
+      for {
+        newSheet <- refreshFromRemote // Pull down the sheet now that there are Cells to operate on
+        cells <- newSheet.cells
+        newCells <- cellsInNewArea(cells, previousMaxRow)
+        returnedCells <- newSheet.sendBatchUpdate(newCells, newRows.flatten)
+      } yield returnedCells
+
     }.flatMap { _ =>
-      // Finish by fetching "this sheet" from the remote end again:
       refreshFromRemote
     }
   }
@@ -132,32 +148,32 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
     }
   }
 
-  /**
-   * Adds additional rows to the bottom of the worksheet. Does not mutate the current Worksheet object!
-   *
-   * Each row you submit must have EXACTLY the same number of items as headerLabels!
-   *
-   * @param newRows a sequence of rows, where each row is a sequence of String values.
-   *
-   * @return a Future containing the new worksheet with the added rows
-   */
-  def addFullRows(newRows: Seq[Seq[String]]): Future[Worksheet] = {
-
-    headerLabels.flatMap { labels =>
-      val expectedSize = labels.size
-
-      // Check precondition: length of each row == expected:
-      val incorrectlySizedRows = newRows.filterNot(_.size == expectedSize)
-
-      if (!incorrectlySizedRows.isEmpty) {
-        Future.failed(new IllegalArgumentException(s"Rows: $incorrectlySizedRows were not of expected length $expectedSize"))
-      } else {
-        val zipped = newRows.map { newRow =>
-          labels.zip(newRow)
-        }
-
-        addRows(zipped)
-      }
-    }
-  }
+  //  /**
+  //   * Adds additional rows to the bottom of the worksheet. Does not mutate the current Worksheet object!
+  //   *
+  //   * Each row you submit must have EXACTLY the same number of items as headerLabels!
+  //   *
+  //   * @param newRows a sequence of rows, where each row is a sequence of String values.
+  //   *
+  //   * @return a Future containing the new worksheet with the added rows
+  //   */
+  //  def addFullRows(newRows: Seq[Seq[String]]): Future[Worksheet] = {
+  //
+  //    headerLabels.flatMap { labels =>
+  //      val expectedSize = labels.size
+  //
+  //      // Check precondition: length of each row == expected:
+  //      val incorrectlySizedRows = newRows.filterNot(_.size == expectedSize)
+  //
+  //      if (!incorrectlySizedRows.isEmpty) {
+  //        Future.failed(new IllegalArgumentException(s"Rows: $incorrectlySizedRows were not of expected length $expectedSize"))
+  //      } else {
+  //        val zipped = newRows.map { newRow =>
+  //          labels.zip(newRow)
+  //        }
+  //
+  //        addRows(zipped)
+  //      }
+  //    }
+  //  }
 }

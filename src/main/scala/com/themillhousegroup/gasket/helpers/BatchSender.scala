@@ -42,19 +42,9 @@ trait BatchSender {
     batchRequestCellFeed
   }
 
-  private def buildBatchInsertRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
-    buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.INSERT)
-  }
-
   private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
     buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.UPDATE)
 
-  }
-
-  def sendBatchInsert(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
-    val cellsWithTheirNewValues = cells.zip(newValues)
-    val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
-    sendBatchRequest(batchRequest)
   }
 
   def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {

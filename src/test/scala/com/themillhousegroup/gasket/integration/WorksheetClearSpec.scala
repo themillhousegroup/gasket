@@ -36,8 +36,8 @@ class WorksheetClearSpec extends Specification with GasketIntegrationSettings wi
       val sheet = result._1
 
       val rowToAdd = Seq(
-        ("Timestamp" -> new Date().getTime.toString),
-        ("Hostname" -> InetAddress.getLocalHost.getHostName)
+        new Date().getTime.toString,
+        InetAddress.getLocalHost.getHostName
       )
 
       val newLocalSheet = Await.result(sheet.addRows(Seq(rowToAdd)), shortWait)
