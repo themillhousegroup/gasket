@@ -28,29 +28,29 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
   isolated
   sequential
 
-  //  "Adding (partial) rows to worksheet" should {
-  //
-  //    "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
-  //
-  //      val result = fetchSheetAndRows(username, password, "Sheet4")
-  //
-  //      val numRows = result._2.size
-  //      numRows must beGreaterThanOrEqualTo(1)
-  //
-  //      val sheet = result._1
-  //
-  //      val rowToAdd = Seq(
-  //        ("Timestamp" -> new Date().getTime.toString),
-  //        ("Hostname" -> InetAddress.getLocalHost.getHostName)
-  //      )
-  //
-  //      val newLocalSheet = Await.result(sheet.addRows(Seq(rowToAdd)), shortWait)
-  //
-  //      val newRows = Await.result(newLocalSheet.rows, shortWait)
-  //
-  //      newRows.size must beEqualTo(numRows + 1)
-  //    }
-  //  }
+    "Adding a single row to worksheet" should {
+
+      "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
+
+        val result = fetchSheetAndRows(username, password, "Sheet4")
+
+        val numRows = result._2.size
+        numRows must beGreaterThanOrEqualTo(1)
+
+        val sheet = result._1
+
+        val rowToAdd = Seq(
+          ("Timestamp" -> new Date().getTime.toString),
+          ("Hostname" -> InetAddress.getLocalHost.getHostName)
+        )
+
+        val newLocalSheet = Await.result(sheet.addRows(Seq(rowToAdd)), shortWait)
+
+        val newRows = Await.result(newLocalSheet.rows, shortWait)
+
+        newRows.size must beEqualTo(numRows + 1)
+      }
+    }
 
   "Adding full rows to worksheet" should {
 

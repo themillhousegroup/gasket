@@ -113,9 +113,9 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
    * @return a Future containing the new worksheet with the added row
    */
   def addRow(newRow: Seq[String]): Future[Worksheet] = {
-    headerLabels.map { labels =>
+    headerLabels.flatMap { labels =>
       if (newRow.size != labels.size) {
-        Future.failed(new IllegalArgumentException(s"Row: $newRow was not of expected length ${labels.size}"))
+        Future.failed(throw new IllegalArgumentException(s"Row: $newRow was not of expected length ${labels.size}"))
       } else {
         val zippedRow = labels.zip(newRow)
 
@@ -124,7 +124,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
           gRow.getCustomElements.setValueLocal(cell._1, cell._2)
         }
         // Send the new row to the API for insertion. This blocks.
-        service.insert(listFeedBaseUrl, gRow)
+        Future(service.insert(listFeedBaseUrl, gRow))
       }
     }.flatMap { _ =>
       // Finish by fetching "this sheet" from the remote end again:

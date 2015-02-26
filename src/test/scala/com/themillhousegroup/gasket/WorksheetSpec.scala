@@ -80,37 +80,31 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
   //    }
   //  }
   //
-  //  "Worksheet addFullRows function" should {
-  //
-  //    "return self if no rows are to be added" in new WorksheetScope {
-  //      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
-  //
-  //      val result = waitFor(w.addFullRows(Nil))
-  //      result must beEqualTo(w)
-  //    }
-  //
-  //    "Reject rows with incorrect number of elements" in new WorksheetScope {
-  //      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
-  //
-  //      val threeNewRows = Seq(Seq("1", "2"), Seq("3"), Seq("5", "6"))
-  //
-  //      waitFor(w.addFullRows(threeNewRows)) must throwAn[IllegalArgumentException].like {
-  //        case iae: IllegalArgumentException => iae.getMessage must beEqualTo("Rows: List(List(3)) were not of expected length 2")
-  //      }
-  //
-  //    }
-  //
-  //    "call the underlying Google update function for each new row" in new WorksheetScope {
-  //      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
-  //
-  //      val threeNewRows = Seq(Seq("1", "2"), Seq("3", "4"), Seq("5", "6"))
-  //
-  //      val result = waitFor(w.addFullRows(threeNewRows))
-  //      result must beEqualTo(w)
-  //
-  //      there were three(mockService).insert(any[URL], any[ListEntry])
-  //    }
-  //  }
+  "Worksheet addRow function" should {
+
+    "Reject rows with incorrect number of elements" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      waitFor(w.addRow(Seq("3"))) must throwAn[IllegalArgumentException]
+      //
+      //        .like {
+      //        case iae: IllegalArgumentException => iae.getMessage must beEqualTo("Row: List(List(3)) were not of expected length 2")
+      //      }
+
+    }
+
+    "call the underlying Google update function for each new row" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val result = waitFor(w.addRow(Seq("1", "2")))
+      result must beEqualTo(w)
+
+      val result2 = waitFor(w.addRow(Seq("3", "4")))
+      result2 must beEqualTo(w)
+
+      there were two(mockService).insert(any[URL], any[ListEntry])
+    }
+  }
 
   "Worksheet clear function" should {
 
