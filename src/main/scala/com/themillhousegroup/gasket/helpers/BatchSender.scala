@@ -12,7 +12,9 @@ import com.themillhousegroup.gasket.traits.Timing
 
 trait BatchSender extends Timing {
 
-  private def sendBatchRequest(worksheet: Worksheet, batchRequest: CellFeed): Future[Seq[Cell]] = {
+  val worksheet: Worksheet
+
+  private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
 
     val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
@@ -28,7 +30,7 @@ trait BatchSender extends Timing {
     }
   }
 
-  private def buildBatchRequest(worksheet: Worksheet, cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
+  private def buildBatchRequest(cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
     val batchRequestCellFeed = new CellFeed()
 
     cellsWithTheirNewValues.foreach {
@@ -43,14 +45,14 @@ trait BatchSender extends Timing {
     batchRequestCellFeed
   }
 
-  private def buildBatchUpdateRequest(worksheet: Worksheet, cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
-    buildBatchRequest(worksheet, cellsWithTheirNewValues, BatchOperationType.UPDATE)
+  private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+    buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.UPDATE)
 
   }
 
-  def sendBatchUpdate(worksheet: Worksheet, cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
+  def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
     val cellsWithTheirNewValues = cells.zip(newValues)
-    val batchRequest = buildBatchUpdateRequest(worksheet, cellsWithTheirNewValues)
-    sendBatchRequest(worksheet, batchRequest)
+    val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
+    sendBatchRequest(batchRequest)
   }
 }

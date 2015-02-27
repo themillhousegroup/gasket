@@ -147,7 +147,6 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
       rowRange.toSeq.flatMap { rowNum =>
         (1 to numColsNeeded).map { colNum =>
           val ce = new CellEntry(rowNum, colNum, "")
-          println(s"Built cell entry at $rowNum, $colNum")
           new Cell(this, ce)
         }
       }
@@ -159,14 +158,12 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
       val newRowsNeeded = newRows.size
       val maxCol = cls.lastOption.map(_.colNumber).getOrElse(1)
 
-      println(s"Need ${previousMaxRow + newRowsNeeded} total rows")
-
       // Expand the remote sheet
       googleEntry.setRowCount(previousMaxRow + newRowsNeeded)
       val largerSheet = copy(googleEntry = googleEntry.update)
 
       val newCells = cellsInNewArea(previousMaxRow, newRowsNeeded, maxCol)
-      sendBatchUpdate(largerSheet, newCells, newRows.flatten).map { _ =>
+      sendBatchUpdate(newCells, newRows.flatten).map { _ =>
         largerSheet
       }
     }.flatMap { s =>
