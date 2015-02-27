@@ -30,16 +30,21 @@ trait BatchSender extends Timing {
     }
   }
 
+  private def buildBatchEntry(cell: Cell, newValue: String, op: BatchOperationType): CellEntry = {
+    val batchEntry = new CellEntry(cell.googleEntry)
+    batchEntry.setId(s"${worksheet.cellFeedBaseUrlString}/${cell.idString}")
+    batchEntry.changeInputValueLocal(newValue)
+    BatchUtils.setBatchId(batchEntry, cell.idString)
+    BatchUtils.setBatchOperationType(batchEntry, op)
+    batchEntry
+  }
+
   private def buildBatchRequest(cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
     val batchRequestCellFeed = new CellFeed()
 
     cellsWithTheirNewValues.foreach {
       case (cell, newValue) =>
-        val batchEntry = new CellEntry(cell.googleEntry)
-        batchEntry.setId(s"${worksheet.cellFeedBaseUrlString}/${cell.idString}")
-        batchEntry.changeInputValueLocal(newValue)
-        BatchUtils.setBatchId(batchEntry, cell.idString)
-        BatchUtils.setBatchOperationType(batchEntry, op)
+        val batchEntry = buildBatchEntry(cell, newValue, op)
         batchRequestCellFeed.getEntries.add(batchEntry)
     }
     batchRequestCellFeed
