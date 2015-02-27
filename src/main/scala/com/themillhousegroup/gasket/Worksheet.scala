@@ -16,7 +16,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
   val worksheet = this
   private def toUrl(s: String): URL = new URI(s).toURL
 
-  lazy private[this] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
+  lazy private[gasket] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
   lazy private[this] val cellFeedBaseUrl = toUrl(cellFeedBaseUrlString)
   lazy private[gasket] val cellFeed = service.getFeed(cellFeedBaseUrl, classOf[CellFeed])
 
@@ -141,38 +141,40 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
    * @return a Future containing the new worksheet with the added rows
    */
   def addRows(newRows: Seq[Seq[String]]): Future[Worksheet] = {
-    def cellsInNewArea(allCells: Seq[Cell], previousMaxRow: Int) = Future.successful {
-      println(s"Sheet has ${allCells.size} cells")
-      println(s"I will consider a cell new if it is rowNumber > $previousMaxRow")
-      val filtered = allCells.filter(_.rowNumber > previousMaxRow)
-      println(s"Came up with $filtered")
-      filtered
+    def cellsInNewArea(previousMaxRow: Int, numRowsNeeded: Int, numColsNeeded: Int) = {
+      val rowRange = (previousMaxRow + 1) to (previousMaxRow + numRowsNeeded)
+
+      rowRange.toSeq.flatMap { rowNum =>
+        (1 to numColsNeeded).map { colNum =>
+          val ce = new CellEntry(rowNum, colNum, "")
+          println(s"Built cell entry at $rowNum, $colNum")
+          new Cell(this, ce)
+        }
+      }
     }
 
-    cells.map { cls =>
+    cells.flatMap { cls =>
 
       val previousMaxRow = cls.lastOption.map(_.rowNumber).getOrElse(1)
       val newRowsNeeded = newRows.size
+      val maxCol = cls.lastOption.map(_.colNumber).getOrElse(1)
 
       println(s"Need ${previousMaxRow + newRowsNeeded} total rows")
 
       // Expand the remote sheet
       googleEntry.setRowCount(previousMaxRow + newRowsNeeded)
-      googleEntry.update
+      val largerSheet = copy(googleEntry = googleEntry.update)
 
-      for {
-        newSheet <- refreshFromRemote // Pull down the sheet now that there are Cells to operate on
-        cells <- newSheet.cells
-        newCells <- cellsInNewArea(cells, previousMaxRow)
-        returnedCells <- newSheet.sendBatchUpdate(newCells, newRows.flatten)
-      } yield returnedCells
-
-    }.flatMap { _ =>
-      refreshFromRemote
+      val newCells = cellsInNewArea(previousMaxRow, newRowsNeeded, maxCol)
+      sendBatchUpdate(largerSheet, newCells, newRows.flatten).map { _ =>
+        largerSheet
+      }
+    }.flatMap { s =>
+      s.refreshFromRemote
     }
   }
 
-  private def refreshFromRemote: Future[Worksheet] = {
+  private[gasket] def refreshFromRemote: Future[Worksheet] = {
     parent.worksheets.map { sheetMap =>
       sheetMap(title)
     }

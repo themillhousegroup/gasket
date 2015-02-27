@@ -8,15 +8,15 @@ import com.google.gdata.data.batch.{ BatchOperationType, BatchUtils }
 import scala.collection.JavaConverters._
 import com.google.gdata.data.ILink._
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.themillhousegroup.gasket.traits.Timing
 
-trait BatchSender {
+trait BatchSender extends Timing {
 
-  val worksheet: Worksheet
+  private def sendBatchRequest(worksheet: Worksheet, batchRequest: CellFeed): Future[Seq[Cell]] = {
 
-  lazy val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
+    val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
-  private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
-    Future(worksheet.service.batch(new URL(batchLink.getHref), batchRequest)).map { batchResponseCellFeed =>
+    Future(time("Batch operation", worksheet.service.batch(new URL(batchLink.getHref), batchRequest))).map { batchResponseCellFeed =>
       val responseEntries = batchResponseCellFeed.getEntries.asScala
       val failures = responseEntries.filter(!BatchUtils.isSuccess(_)).map(BatchUtils.getBatchStatus(_))
 
@@ -28,28 +28,29 @@ trait BatchSender {
     }
   }
 
-  private def buildBatchRequest(cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
+  private def buildBatchRequest(worksheet: Worksheet, cellsWithTheirNewValues: Seq[(Cell, String)], op: BatchOperationType): CellFeed = {
     val batchRequestCellFeed = new CellFeed()
 
     cellsWithTheirNewValues.foreach {
       case (cell, newValue) =>
         val batchEntry = new CellEntry(cell.googleEntry)
+        batchEntry.setId(s"${worksheet.cellFeedBaseUrlString}/${cell.idString}")
         batchEntry.changeInputValueLocal(newValue)
         BatchUtils.setBatchId(batchEntry, cell.idString)
         BatchUtils.setBatchOperationType(batchEntry, op)
-        batchRequestCellFeed.getEntries().add(batchEntry)
+        batchRequestCellFeed.getEntries.add(batchEntry)
     }
     batchRequestCellFeed
   }
 
-  private def buildBatchUpdateRequest(cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
-    buildBatchRequest(cellsWithTheirNewValues, BatchOperationType.UPDATE)
+  private def buildBatchUpdateRequest(worksheet: Worksheet, cellsWithTheirNewValues: Seq[(Cell, String)]): CellFeed = {
+    buildBatchRequest(worksheet, cellsWithTheirNewValues, BatchOperationType.UPDATE)
 
   }
 
-  def sendBatchUpdate(cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
+  def sendBatchUpdate(worksheet: Worksheet, cells: Seq[Cell], newValues: Seq[String]): Future[Seq[Cell]] = {
     val cellsWithTheirNewValues = cells.zip(newValues)
-    val batchRequest = buildBatchUpdateRequest(cellsWithTheirNewValues)
-    sendBatchRequest(batchRequest)
+    val batchRequest = buildBatchUpdateRequest(worksheet, cellsWithTheirNewValues)
+    sendBatchRequest(worksheet, batchRequest)
   }
 }

@@ -36,7 +36,7 @@ case class Block(val worksheet: Worksheet, cells: Seq[Cell]) extends Ordered[Blo
     if (newValues.size != cells.size) {
       Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
     } else {
-      sendBatchUpdate(cells, newValues).map { updatedCells =>
+      sendBatchUpdate(worksheet, cells, newValues).map { updatedCells =>
         this.copy(cells = updatedCells)
       }
     }
