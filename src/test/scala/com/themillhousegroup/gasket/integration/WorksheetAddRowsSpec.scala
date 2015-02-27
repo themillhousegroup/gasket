@@ -28,28 +28,7 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
   isolated
   sequential
 
-  "Adding a single row to worksheet" should {
-
-    "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
-
-      val result = fetchSheetAndRows(username, password, "Sheet4")
-
-      val numRows = result._2.size
-      numRows must beGreaterThanOrEqualTo(1)
-
-      val sheet = result._1
-
-      val rowToAdd = Seq(new Date().getTime.toString, InetAddress.getLocalHost.getHostName, "Single Row Add")
-
-      val newLocalSheet = Await.result(sheet.addRow(rowToAdd), shortWait)
-
-      val newRows = Await.result(newLocalSheet.rows, shortWait)
-
-      newRows.size must beEqualTo(numRows + 1)
-    }
-  }
-
-  //  "Adding full rows to worksheet" should {
+  //  "Adding a single row to worksheet" should {
   //
   //    "Modify the worksheet both locally and remotely" in IntegrationScope { (username, password) =>
   //
@@ -60,17 +39,38 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
   //
   //      val sheet = result._1
   //
-  //      val rowToAdd = Seq(
-  //        new Date().getTime.toString,
-  //        InetAddress.getLocalHost.getHostName,
-  //        "Multi Row - but just one"
-  //      )
+  //      val rowToAdd = Seq(new Date().getTime.toString, InetAddress.getLocalHost.getHostName, "Single Row Add")
   //
-  //      val newLocalSheet = Await.result(sheet.addRows(Seq(rowToAdd)), shortWait)
+  //      val newLocalSheet = Await.result(sheet.addRow(rowToAdd), shortWait)
   //
   //      val newRows = Await.result(newLocalSheet.rows, shortWait)
   //
   //      newRows.size must beEqualTo(numRows + 1)
   //    }
   //  }
+
+  "Adding multiple rows to worksheet" should {
+
+    "Modify the worksheet both locally and remotely - single row case" in IntegrationScope { (username, password) =>
+
+      val result = fetchSheetAndRows(username, password, "Sheet4")
+
+      val numRows = result._2.size
+      numRows must beGreaterThanOrEqualTo(1)
+
+      val sheet = result._1
+
+      val rowToAdd = Seq(
+        new Date().getTime.toString,
+        InetAddress.getLocalHost.getHostName,
+        "Multi Row - but just one"
+      )
+
+      val newLocalSheet = Await.result(sheet.addRows(Seq(rowToAdd)), shortWait)
+
+      val newRows = Await.result(newLocalSheet.rows, shortWait)
+
+      newRows.size must beEqualTo(numRows + 1)
+    }
+  }
 }
