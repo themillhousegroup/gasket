@@ -135,7 +135,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
   /**
    * Adds additional rows to the bottom of the worksheet. Does NOT mutate the current Worksheet object!
    *
-   * For performance, this is a batched operation. The "official" way to add rows is one-at-a-time
+   * For performance, this is a batched operation. The "official Google" way to add rows is one-at-a-time
    * which gives unacceptable performance for anything more than a couple of rows.
    *
    * @return a Future containing the new worksheet with the added rows
