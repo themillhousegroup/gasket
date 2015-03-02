@@ -8,6 +8,7 @@ import com.google.gdata.data.spreadsheet.{ WorksheetFeed, ListEntry, WorksheetEn
 import scala.concurrent.Future
 import scala.IllegalArgumentException
 import com.google.gdata.client.spreadsheet.SpreadsheetService
+import com.google.gdata.data.IFeed
 
 class WorksheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
@@ -55,31 +56,6 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
     }
   }
 
-  //  "Worksheet addRows function" should {
-  //
-  //    "return self if no rows are to be added" in new WorksheetScope {
-  //      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
-  //
-  //      val result = waitFor(w.addRows(Nil))
-  //      result must beEqualTo(w)
-  //    }
-  //
-  //    "call the underlying Google update function for each new row" in new WorksheetScope {
-  //      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
-  //
-  //      val threeNewRows = Seq(
-  //        Seq("foo" -> "1", "bar" -> "2"),
-  //        Seq("foo" -> "3", "bar" -> "4"),
-  //        Seq("foo" -> "5", "bar" -> "6")
-  //      )
-  //
-  //      val result = waitFor(w.addRows(threeNewRows))
-  //      result must beEqualTo(w)
-  //
-  //      there were three(mockService).insert(any[URL], any[ListEntry])
-  //    }
-  //  }
-  //
   "Worksheet addRow function" should {
 
     "Reject rows with incorrect number of elements" in new WorksheetScope {
@@ -103,6 +79,39 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
       result2 must beEqualTo(w)
 
       there were two(mockService).insert(any[URL], any[ListEntry])
+    }
+  }
+
+  "Worksheet addRows function" should {
+
+    "call the Batch entry setup function for each new row" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val threeNewRows = Seq(
+        Seq("1", "2"),
+        Seq("3", "4"),
+        Seq("5", "6")
+      )
+
+      val result = waitFor(w.addRows(threeNewRows))
+      result must beEqualTo(w)
+
+      there were three(mockService).insert(any[URL], any[ListEntry])
+    }
+
+    "call the Batch operation only once" in new WorksheetScope {
+      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
+
+      val threeNewRows = Seq(
+        Seq("1", "2"),
+        Seq("3", "4"),
+        Seq("5", "6")
+      )
+
+      val result = waitFor(w.addRows(threeNewRows))
+      result must beEqualTo(w)
+
+      there was one(mockService).batch(any[URL], any[IFeed])
     }
   }
 

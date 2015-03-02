@@ -14,10 +14,9 @@ trait BatchSender extends Timing {
 
   val worksheet: Worksheet
 
+  val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
+
   private def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
-
-    val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
-
     Future(time("Batch operation", worksheet.service.batch(new URL(batchLink.getHref), batchRequest))).map { batchResponseCellFeed =>
       val responseEntries = batchResponseCellFeed.getEntries.asScala
       val failures = responseEntries.filter(!BatchUtils.isSuccess(_)).map(BatchUtils.getBatchStatus(_))
