@@ -11,9 +11,9 @@ import com.google.gdata.data.batch.BatchOperationType
 import scala.collection.JavaConverters._
 import com.themillhousegroup.gasket.helpers.BatchSender
 
-case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with BatchSender with Timing {
+case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, val googleEntry: WorksheetEntry) extends ScalaEntry[WorksheetEntry] with Timing {
 
-  val worksheet = this
+  lazy val batchSender = new BatchSender(this)
   private def toUrl(s: String): URL = new URI(s).toURL
 
   lazy private[gasket] val cellFeedBaseUrlString = googleEntry.getCellFeedUrl.toString
@@ -163,7 +163,7 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
       val largerSheet = copy(googleEntry = googleEntry.update)
 
       val newCells = cellsInNewArea(previousMaxRow, newRowsNeeded, maxCol)
-      sendBatchUpdate(newCells, newRows.flatten).map { _ =>
+      batchSender.sendBatchUpdate(newCells, newRows.flatten).map { _ =>
         largerSheet
       }
     }.flatMap { s =>

@@ -26,9 +26,7 @@ trait EssentialBatchSender[R] {
   }
 }
 
-trait BatchSender extends EssentialBatchSender[CellFeed] with Timing {
-
-  val worksheet: Worksheet
+class BatchSender(val worksheet: Worksheet) extends EssentialBatchSender[CellFeed] with Timing {
 
   lazy val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 

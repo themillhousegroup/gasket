@@ -17,8 +17,9 @@ import com.themillhousegroup.gasket.helpers.BatchSender
  *
  *
  */
-case class Block(val worksheet: Worksheet, cells: Seq[Cell]) extends Ordered[Block] with BatchSender {
+case class Block(val worksheet: Worksheet, cells: Seq[Cell]) extends Ordered[Block] {
 
+  lazy val batchSender = new BatchSender(worksheet)
   lazy val minRow = cells.head.rowNumber
   lazy val minColumn = cells.head.colNumber
 
@@ -36,7 +37,7 @@ case class Block(val worksheet: Worksheet, cells: Seq[Cell]) extends Ordered[Blo
     if (newValues.size != cells.size) {
       Future.failed(new IllegalArgumentException(s"Expected ${cells.size} new values, but was given ${newValues.size}"))
     } else {
-      sendBatchUpdate(cells, newValues).map { updatedCells =>
+      batchSender.sendBatchUpdate(cells, newValues).map { updatedCells =>
         this.copy(cells = updatedCells)
       }
     }
