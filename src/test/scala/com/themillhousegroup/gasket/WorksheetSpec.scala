@@ -9,12 +9,20 @@ import scala.concurrent.Future
 import scala.IllegalArgumentException
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.data.IFeed
+import com.themillhousegroup.gasket.helpers.BatchSender
 
 class WorksheetSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
   trait WorksheetScope extends MockSpreadsheetScope {
 
-    val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
+    val mockBatchSender = mock[BatchSender]
+    mockBatchSender.sendBatchUpdate(any[Seq[Cell]], any[Seq[String]]) returns Future.successful(Seq())
+
+    val w = new Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry) {
+      override lazy val batchSender = mockBatchSender
+    }
+
+    mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
 
     mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
     mockService.batch(any[URL], any[IFeed]) returns mockCellFeed
@@ -60,18 +68,11 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
   "Worksheet addRow function" should {
 
     "Reject rows with incorrect number of elements" in new WorksheetScope {
-      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
 
       waitFor(w.addRow(Seq("3"))) must throwAn[IllegalArgumentException]
-      //
-      //        .like {
-      //        case iae: IllegalArgumentException => iae.getMessage must beEqualTo("Row: List(List(3)) were not of expected length 2")
-      //      }
-
     }
 
     "call the underlying Google update function for each new row" in new WorksheetScope {
-      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
 
       val result = waitFor(w.addRow(Seq("1", "2")))
       result must beEqualTo(w)
@@ -85,7 +86,7 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
 
   "Worksheet addRows function" should {
 
-    "call the Batch entry setup function for each new row" in new WorksheetScope {
+    "expand the sheet to account for the new rows" in new WorksheetScope {
 
       val threeNewRows = Seq(
         Seq("1", "2"),
@@ -94,9 +95,8 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
       )
 
       val result = waitFor(w.addRows(threeNewRows))
-      result must beEqualTo(w)
 
-      there were three(mockService).insert(any[URL], any[ListEntry])
+      there was one(mockWorksheetEntry).setRowCount(org.mockito.Matchers.eq(5))
     }
 
     "call the Batch operation only once" in new WorksheetScope {
@@ -110,7 +110,7 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
       val result = waitFor(w.addRows(threeNewRows))
       result must beEqualTo(w)
 
-      there was one(mockService).batch(any[URL], any[IFeed])
+      there was one(mockBatchSender).sendBatchUpdate(any[Seq[Cell]], any[Seq[String]])
     }
   }
 
