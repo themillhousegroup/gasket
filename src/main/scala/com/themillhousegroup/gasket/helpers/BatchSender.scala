@@ -30,7 +30,7 @@ trait BatchSender extends EssentialBatchSender[CellFeed] with Timing {
 
   val worksheet: Worksheet
 
-  val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
+  lazy val batchLink = worksheet.cellFeed.getLink(Rel.FEED_BATCH, Type.ATOM)
 
   protected def sendBatchRequest(batchRequest: CellFeed): Future[Seq[Cell]] = {
     Future(time("Batch operation", worksheet.service.batch(new URL(batchLink.getHref), batchRequest))).map { batchResponseCellFeed =>

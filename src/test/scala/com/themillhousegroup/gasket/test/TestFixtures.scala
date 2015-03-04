@@ -3,7 +3,7 @@ package com.themillhousegroup.gasket.test
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.data.spreadsheet._
 import java.net.URL
-import com.google.gdata.data.{ IFeed, PlainTextConstruct }
+import com.google.gdata.data.{ Link, Source, IFeed, PlainTextConstruct }
 import com.themillhousegroup.gasket.{ Account, Spreadsheet }
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -50,6 +50,7 @@ trait TestFixtures {
     mockWorksheetEntry.getCellFeedUrl returns fakeCellFeedUrl
     mockWorksheetEntry.getListFeedUrl returns fakeListFeedUrl
     mockWorksheetEntry.getTitle returns new PlainTextConstruct("mockWorksheetEntry")
+    mockWorksheetEntry.update returns mockWorksheetEntry
 
     val mockCellFeed = mock[CellFeed]
     val mockEmptyCellFeed = mock[CellFeed]
@@ -59,7 +60,11 @@ trait TestFixtures {
     val c3 = mockCellEntry(2, 1)
     val c4 = mockCellEntry(2, 2)
 
+    val mockLink = mock[Link]
+    mockLink.getHref returns "http://www.google.com"
+
     mockCellFeed.getEntries returns com.google.common.collect.Lists.newArrayList(c1, c2, c3, c4)
+    mockCellFeed.getLink(anyString, anyString) returns mockLink
     mockWorksheetEntry.getRowCount returns 2
     mockWorksheetEntry.getColCount returns 2
 

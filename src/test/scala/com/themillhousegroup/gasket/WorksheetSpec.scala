@@ -17,6 +17,7 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
     val w = Worksheet(mockService, mockSpreadsheet, mockWorksheetEntry)
 
     mockService.getFeed(any[URL], any[Class[CellFeed]]) returns mockCellFeed
+    mockService.batch(any[URL], any[IFeed]) returns mockCellFeed
   }
 
   trait EmptyWorksheetScope extends MockSpreadsheetScope {
@@ -85,7 +86,6 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
   "Worksheet addRows function" should {
 
     "call the Batch entry setup function for each new row" in new WorksheetScope {
-      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
 
       val threeNewRows = Seq(
         Seq("1", "2"),
@@ -100,7 +100,6 @@ class WorksheetSpec extends Specification with Mockito with TestHelpers with Tes
     }
 
     "call the Batch operation only once" in new WorksheetScope {
-      mockSpreadsheet.worksheets returns Future.successful(Map(w.title -> w))
 
       val threeNewRows = Seq(
         Seq("1", "2"),
