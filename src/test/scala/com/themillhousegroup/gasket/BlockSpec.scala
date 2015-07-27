@@ -6,6 +6,8 @@ import org.specs2.mock.Mockito
 import com.google.gdata.data.spreadsheet.{ CellFeed, CellEntry }
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import java.net.URL
+import com.themillhousegroup.gasket.helpers.BatchSender
+import scala.concurrent.Future
 
 class BlockSpec extends Specification with Mockito with TestHelpers with TestFixtures {
 
@@ -34,11 +36,22 @@ class BlockSpec extends Specification with Mockito with TestHelpers with TestFix
 
   "Update function" should {
 
-    "Reject a sequence of new values that is incorrectly size" in new MockSpreadsheetScope {
+    "Reject a sequence of new values that is incorrectly sized" in new MockSpreadsheetScope {
       val twoRows = Seq(c1, c2, c3, c4).map(Cell(worksheet, _))
       val block = Block(worksheet, twoRows)
 
       waitFor(block.update(Seq())) must throwAn[IllegalArgumentException]
+    }
+
+    "Return a new Block containing the updated values" in new MockSpreadsheetScope {
+      val twoRows = Seq(c1, c2, c3, c4).map(Cell(worksheet, _))
+      val block = new Block(worksheet, twoRows) {
+        override lazy val batchSender = mock[BatchSender]
+        batchSender.sendBatchUpdate(any[Seq[Cell]], any[Seq[String]]) returns Future.successful(Seq(c4, c3, c2, c1).map(Cell(worksheet, _)))
+      }
+
+      val result = waitFor(block.update(Seq("a", "b", "c", "d")))
+      result must not be equalTo(block)
     }
   }
 }
