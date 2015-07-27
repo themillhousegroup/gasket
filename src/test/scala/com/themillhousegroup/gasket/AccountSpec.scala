@@ -41,6 +41,19 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
     }
   }
 
+  "Simple exception example" should {
+    "be OK" in {
+      val theService = mock[SpreadsheetService]
+      theService.setUserCredentials(org.mockito.Matchers.eq("bad"), anyString) throws new InvalidCredentialsException("denied")
+
+      object TheTestAccount extends AccountBuilder {
+        override lazy val service = theService
+      }
+      waitFor(TheTestAccount("bad", "")) must throwAn[InvalidCredentialsException]
+
+    }
+  }
+
   "Account access" should {
     "return a failed future for bad credentials" in new MockAccountScope {
       gettingAccount("bad") must throwAn[InvalidCredentialsException]
