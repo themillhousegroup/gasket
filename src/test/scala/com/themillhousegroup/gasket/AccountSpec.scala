@@ -11,6 +11,7 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.data.IFeed
 
 class AccountSpec extends Specification with Mockito with TestHelpers with TestFixtures {
+  val mockFile = mock[java.io.File]
 
   class MockAccountScope(spreadsheetEntries: Seq[SpreadsheetEntry] = Nil) extends MockScope {
     import scala.collection.JavaConverters._
@@ -26,7 +27,7 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
     }
 
     def gettingAccount(u: String = "good") = {
-      waitFor(TestAccount(u, ""))
+      waitFor(TestAccount(u, mockFile))
     }
 
     lazy val acct = gettingAccount()
@@ -49,7 +50,7 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
       object TheTestAccount extends AccountBuilder {
         override lazy val service = theService
       }
-      waitFor(TheTestAccount("bad", "")) must throwAn[InvalidCredentialsException]
+      waitFor(TheTestAccount("bad", mockFile)) must throwAn[InvalidCredentialsException]
 
     }
   }

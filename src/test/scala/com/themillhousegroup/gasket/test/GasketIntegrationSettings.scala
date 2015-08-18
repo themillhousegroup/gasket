@@ -15,13 +15,12 @@ import scala.concurrent.Await
  *
  * Consisting of exactly two lines:
  *
- * <google-username>
- * <app-password>
+ * <google-clientid>
+ * <p12-file-location>
  *
- * Where <google-username> should be something like bob@gmail.com
- * and the <app-password> should (ideally) be an "App Password" that you've created
- * just for Gasket by using a browser to log in to Google, then going to
- * Account -> Security -> App Passwords -> Settings
+ * Where <google-clientid> should be something like abc-123-def-456@developer.gserviceaccount.com
+ * and the <p12-file-location> should be the absolute path to a .p12 file containing credentials
+ * for this Service Account
  */
 trait GasketIntegrationSettings {
   lazy val homeDir = System.getProperty("user.home")
@@ -49,7 +48,7 @@ trait GasketIntegrationSettings {
     val skipMessage = "No Credentials in filesystem. Skipping integration test."
     val log = LoggerFactory.getLogger(getClass)
 
-    def apply(block: (String, String) => Result): Scope = {
+    def apply(block: (String, File) => Result): Scope = {
       maybeCredentials.fold {
         new Scope with StandardResults {
           log.warn(skipMessage)
@@ -58,11 +57,11 @@ trait GasketIntegrationSettings {
       } {
         withFileIterator(_) { implicit it =>
 
-          lazy val username = readLine("username")
-          lazy val password = readLine("password")
+          lazy val clientId = readLine("clientId")
+          lazy val p12FileLocation = readLine("p12-file-location")
 
           new Scope {
-            block(username, password)
+            block(clientId, new java.io.File(p12FileLocation))
           }
         }
 

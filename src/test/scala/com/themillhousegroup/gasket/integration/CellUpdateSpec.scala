@@ -44,11 +44,11 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
 
     }
 
-    "make a single change as part of a for-comprehension" in IntegrationScope { (username, password) =>
+    "make a single change as part of a for-comprehension" in IntegrationScope { (clientId, p12File) =>
 
       val futureCell =
         for {
-          acct <- Account(username, password)
+          acct <- Account(clientId, p12File)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
           cells <- ws("Sheet3").cells
