@@ -6,28 +6,32 @@ import org.specs2.specification.Scope
 import com.google.gdata.client.GoogleService.InvalidCredentialsException
 import com.google.gdata.data.spreadsheet.{ SpreadsheetEntry, SpreadsheetFeed }
 import java.net.URL
+import java.io.File
 import com.themillhousegroup.gasket.test.{ TestFixtures, TestHelpers }
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import com.google.gdata.data.IFeed
+import scala.collection.JavaConverters._
+import scala.concurrent.Future
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 
 class AccountSpec extends Specification with Mockito with TestHelpers with TestFixtures {
   val mockFile = mock[java.io.File]
 
   class MockAccountScope(spreadsheetEntries: Seq[SpreadsheetEntry] = Nil) extends MockScope {
-    import scala.collection.JavaConverters._
 
     val mockService = mock[SpreadsheetService]
-
-    mockService.setUserCredentials(org.mockito.Matchers.eq("bad"), anyString) throws new InvalidCredentialsException("denied")
-
-    mockService.getFeed(any[URL], any[Class[IFeed]]) returns mockSpreadsheetFeed
+    val mockBuilder = mock[(String, File) => Future[GoogleCredential]]
+    val mockCredential = mock[GoogleCredential]
+    mockBuilder.apply(org.mockito.Matchers.eq("good"), any[File]) returns Future.successful(mockCredential)
+    mockBuilder.apply(org.mockito.Matchers.eq("bad"), any[File]) returns Future.failed(new InvalidCredentialsException("denied"))
 
     object TestAccount extends AccountBuilder {
       override lazy val service = mockService
+      override def buildCredential(clientId: String, p12: File) = mockBuilder(clientId, p12)
     }
 
-    def gettingAccount(u: String = "good") = {
-      waitFor(TestAccount(u, mockFile))
+    def gettingAccount(cId: String = "good") = {
+      waitFor(TestAccount(cId, mockFile))
     }
 
     lazy val acct = gettingAccount()
@@ -39,19 +43,6 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
 
     def gettingSpreadsheets = {
       waitFor(acct.spreadsheets)
-    }
-  }
-
-  "Simple exception example" should {
-    "be OK" in {
-      val theService = mock[SpreadsheetService]
-      theService.setUserCredentials(org.mockito.Matchers.eq("bad"), anyString) throws new InvalidCredentialsException("denied")
-
-      object TheTestAccount extends AccountBuilder {
-        override lazy val service = theService
-      }
-      waitFor(TheTestAccount("bad", mockFile)) must throwAn[InvalidCredentialsException]
-
     }
   }
 

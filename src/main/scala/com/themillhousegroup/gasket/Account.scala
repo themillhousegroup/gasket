@@ -29,15 +29,19 @@ object Account extends AccountBuilder {
 protected[this] class AccountBuilder {
   lazy val service = new SpreadsheetService("gasket")
 
-  def apply(clientId: String, p12: File): Future[Account] = Future {
-    val credential = new GoogleCredential.Builder().
+  def buildCredential(clientId: String, p12: File): Future[GoogleCredential] = Future {
+    new GoogleCredential.Builder().
       setServiceAccountScopes(Account.scopesArray).
       setServiceAccountId(clientId).
       setServiceAccountPrivateKeyFromP12File(p12).
       build()
+  }
 
-    service.setOAuth2Credentials(credential)
-    new Account(service)
+  def apply(clientId: String, p12: File): Future[Account] = {
+    buildCredential(clientId, p12).map { credential =>
+      service.setOAuth2Credentials(credential)
+      new Account(service)
+    }
   }
 }
 
