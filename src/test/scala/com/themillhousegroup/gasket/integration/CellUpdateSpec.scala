@@ -22,9 +22,9 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
   val moddedValue = "MODIFIED"
 
   "Cell Update example" should {
-    "make a single change" in IntegrationScope { (username, password) =>
+    "make a single change" in IntegrationScope { (username, p12File) =>
 
-      val result = fetchSheetAndCells(username, password, "Sheet2")._2
+      val result = fetchSheetAndCells(username, p12File, "Sheet2")._2
       result must not beEmpty
 
       result must haveSize(1)
@@ -59,7 +59,7 @@ class CellUpdateSpec extends Specification with GasketIntegrationSettings with T
 
       val rolledBackCell =
         for {
-          acct <- Account(username, password)
+          acct <- Account(clientId, p12File)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
           cells <- ws("Sheet3").cells
