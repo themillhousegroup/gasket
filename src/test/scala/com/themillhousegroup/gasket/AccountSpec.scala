@@ -20,6 +20,8 @@ class AccountSpec extends Specification with Mockito with TestHelpers with TestF
   class MockAccountScope(spreadsheetEntries: Seq[SpreadsheetEntry] = Nil) extends MockScope {
 
     val mockService = mock[SpreadsheetService]
+    mockService.getFeed(any[URL], any[Class[IFeed]]) returns mockSpreadsheetFeed
+
     val mockBuilder = mock[(String, File) => Future[GoogleCredential]]
     val mockCredential = mock[GoogleCredential]
     mockBuilder.apply(org.mockito.Matchers.eq("good"), any[File]) returns Future.successful(mockCredential)
