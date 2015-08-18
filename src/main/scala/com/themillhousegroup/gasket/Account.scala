@@ -1,6 +1,8 @@
 package com.themillhousegroup.gasket
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.jackson.JacksonFactory
 import com.google.gdata.client.spreadsheet.SpreadsheetService
 import java.net.URL
 import java.io.File
@@ -13,24 +15,27 @@ import scala.collection.JavaConverters._
 object Account extends AccountBuilder {
   private[gasket] val SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full")
 
-  // http://stackoverflow.com/questions/30483601/create-spreadsheet-using-google-spreadsheet-api-in-google-drive-in-java
-  //private[gasket] val CLIENT_ID = "1078815581589-ckv4dcn0f9lruaf4o678lu5edjk5kdma@developer.gserviceaccount.com" // notasecret
-
   val scopesArray = List(
     "https://spreadsheets.google.com/feeds",
     "https://spreadsheets.google.com/feeds/spreadsheets/private/full",
     "https://docs.google.com/feeds").asJava
 
-  override lazy val service = new SpreadsheetService("gasket")
+  val httpTransport = new NetHttpTransport()
 
+  val jsonFactory = new JacksonFactory()
+
+  override lazy val service = new SpreadsheetService("gasket")
 }
 
 // Solely to allow a mocked SpreadsheetService for testing
 protected[this] class AccountBuilder {
   lazy val service = new SpreadsheetService("gasket")
 
+  // http://stackoverflow.com/questions/30483601/create-spreadsheet-using-google-spreadsheet-api-in-google-drive-in-java
   def buildCredential(clientId: String, p12: File): Future[GoogleCredential] = Future {
     new GoogleCredential.Builder().
+      setTransport(Account.httpTransport).
+      setJsonFactory(Account.jsonFactory).
       setServiceAccountScopes(Account.scopesArray).
       setServiceAccountId(clientId).
       setServiceAccountPrivateKeyFromP12File(p12).

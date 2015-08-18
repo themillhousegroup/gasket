@@ -9,11 +9,12 @@ crossScalaVersions := Seq("2.11.7", "2.10.4")
 organization := "com.themillhousegroup"
 
 libraryDependencies ++= Seq(
-    "com.google.gdata"      %   "core"                    % "1.47.1",
-    "com.google.api-client"	%   "google-api-client"       % "1.20.0",
-    "ch.qos.logback"        %   "logback-classic"         % "1.1.3",
-    "org.mockito"           %   "mockito-all"             % "1.10.19",
-    "org.specs2"            %%  "specs2"                  % "2.3.13"  % "test"
+    "com.google.gdata"      	%   "core"                    			% "1.47.1",
+    "com.google.api-client"		%   "google-api-client"       			% "1.20.0",
+    "com.google.http-client"	%   "google-http-client-jackson"    % "1.19.0",
+    "ch.qos.logback"        	%   "logback-classic"         			% "1.1.3",
+    "org.mockito"           	%   "mockito-all"             			% "1.10.19",
+    "org.specs2"            	%%  "specs2"                  			% "2.3.13"  	% "test"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
