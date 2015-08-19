@@ -61,6 +61,23 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 ```
 
+Granting Access to your app
+===========================
+
+Since May 2015, Google requires OAuth 2.0 authentication to access spreadsheets shared from Google Drive. As a result, Gasket 2.x has
+a changed `Account` API entry point, requiring a `clientID' string and `.p12`	file to gain access. Here's how to get these:
+
+ - Register at [https://console.developers.google.com]
+ - Create a new project for your project that is using Gasket
+ - Under APIs & Auth -> Credential -> Create New Client ID for Service Account
+ - When the Client ID is generated, also generate a P12 key, and download that to somewhere local
+
+You now have all the credentials you need - here's where they go:
+ - `Client ID` is the first parameter to the `Account` constructor - it probably looks like `10788-xyz-123.apps.googleusercontent.com`
+ - The `.p12` file should be loaded into your project and passed to the `Account` constructor as a `java.io.File` handle
+ - In Google Drive, share your target spreadsheet with the __email address__ associated with the credentials (probably something like `10788-xyz-123@developer.gserviceaccount.com`) 
+
+(For more info, check out this [Stack Overflow Answer](http://stackoverflow.com/questions/30483601/create-spreadsheet-using-google-spreadsheet-api-in-google-drive-in-java#30533517))
 
 
 Implementation
@@ -84,7 +101,7 @@ which contains several more examples):
    ```
        val futureCellContents =
            for {
-             acct      <- Account(username, password)
+             acct      <- Account(clientId, p12File)
              ss        <- acct.spreadsheets
              ws        <- ss("Example Spreadsheet").worksheets
              cells     <- ws("Sheet1").cells
@@ -97,7 +114,7 @@ which contains several more examples):
    ```
       val futureRows =
         for {
-          acct <- Account(username, password)
+          acct <- Account(clientId, p12File)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
           rows <- ws("Sheet1").block(1 to 2, 2 to 3)
@@ -127,7 +144,7 @@ That is, it performs the API call to update the remote spreadsheet, and returns 
 
 ```
    for {
-     acct <- Account(username, password)
+     acct <- Account(clientId, p12File)
      ss <- acct.spreadsheets
      ws <- ss("Example Spreadsheet").worksheets
      cells <- ws("Sheet3").cells
