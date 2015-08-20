@@ -43,6 +43,7 @@ The sky's the limit, and if you're here, you probably already have an applicatio
 
 Installation
 ============
+Gasket is built for both Scala 2.10 and 2.11.
 Bring in the library by adding the following to your ```build.sbt```. 
 
   - The release repository: 
@@ -56,7 +57,7 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "gasket" % "1.1.48"
+     "com.themillhousegroup" %% "gasket" % "2.0.64"
    )
 
 ```
