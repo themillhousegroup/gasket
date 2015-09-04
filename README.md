@@ -66,7 +66,7 @@ Granting Access to your app
 ===========================
 
 Since May 2015, Google requires OAuth 2.0 authentication to access spreadsheets shared from Google Drive. As a result, Gasket 2.x has
-a changed `Account` API entry point, requiring a `clientID' string and `.p12`	file to gain access. Here's how to get these:
+a changed `Account` API entry point, requiring a `clientID` string and `.p12`	file to gain access. Here's how to get these:
 
  - Register at [https://console.developers.google.com]
  - Create a new project for your project that is using Gasket
@@ -166,13 +166,4 @@ Still To Come
  - More updating methods
  - A Scala-idiomatic way of performing batched operations
  - More performance
-
-Troubleshooting
-===============
-
-If you get a ```com.google.gdata.client.GoogleService$InvalidCredentialsException: Invalid credentials``` when trying to
-create an ```Account```, the most likely cause is that your Google account has 2-factor authentication activated.
-
-The best solution is to log into your account with a browser, go to Account -> Security -> App Passwords -> Settings and
-add a special password just for Gasket / your app to use.
 
