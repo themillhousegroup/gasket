@@ -167,3 +167,12 @@ Still To Come
  - A Scala-idiomatic way of performing batched operations
  - More performance
 
+Troubleshooting
+===============
+
+If you see a `TokenResponseException: 400 Bad Request` containing the JSON:
+```
+  	{ "error" : "invalid_grant" }  
+```
+then you've supplied the wrong identifier as the first parameter to `Account`. It needs to be the "email address" as listed at https://console.developers.google.com/project/[YOUR_PROJECT]/apiui/credential.
+
