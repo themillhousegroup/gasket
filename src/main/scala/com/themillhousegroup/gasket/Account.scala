@@ -32,18 +32,18 @@ protected[this] class AccountBuilder {
   lazy val service = new SpreadsheetService("gasket")
 
   // http://stackoverflow.com/questions/30483601/create-spreadsheet-using-google-spreadsheet-api-in-google-drive-in-java
-  def buildCredential(clientId: String, p12: File): Future[GoogleCredential] = Future {
+  def buildCredential(googleServiceAccountEmailAddress: String, p12: File): Future[GoogleCredential] = Future {
     new GoogleCredential.Builder().
       setTransport(Account.httpTransport).
       setJsonFactory(Account.jsonFactory).
       setServiceAccountScopes(Account.scopesArray).
-      setServiceAccountId(clientId).
+      setServiceAccountId(googleServiceAccountEmailAddress).
       setServiceAccountPrivateKeyFromP12File(p12).
       build()
   }
 
-  def apply(clientId: String, p12: File): Future[Account] = {
-    buildCredential(clientId, p12).map { credential =>
+  def apply(googleServiceAccountEmailAddress: String, p12: File): Future[Account] = {
+    buildCredential(googleServiceAccountEmailAddress, p12).map { credential =>
       service.setOAuth2Credentials(credential)
       new Account(service)
     }
