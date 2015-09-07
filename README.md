@@ -74,9 +74,9 @@ a changed `Account` API entry point, requiring a `clientID` string and `.p12`	fi
  - When the Client ID is generated, also generate a P12 key, and download that to somewhere local
 
 You now have all the credentials you need - here's where they go:
- - `Client ID` is the first parameter to the `Account` constructor - it probably looks like `10788-xyz-123.apps.googleusercontent.com`
+ - The first parameter to the `Account` constructor is the Service Account __email address__ - it probably looks like `10788-xyz-123@developer.gserviceaccount.com`
  - The `.p12` file should be loaded into your project and passed to the `Account` constructor as a `java.io.File` handle
- - In Google Drive, share your target spreadsheet with the __email address__ associated with the credentials (probably something like `10788-xyz-123@developer.gserviceaccount.com`) 
+ - In Google Drive, share your target spreadsheet with the Service Account __email address__ 
 
 (For more info, check out this [Stack Overflow Answer](http://stackoverflow.com/questions/30483601/create-spreadsheet-using-google-spreadsheet-api-in-google-drive-in-java#30533517))
 
