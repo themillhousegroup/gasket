@@ -51,9 +51,9 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
 
   "Adding multiple rows to worksheet" should {
 
-    "Modify the worksheet both locally and remotely - single row case" in IntegrationScope { (username, password) =>
+    "Modify the worksheet both locally and remotely - single row case" in IntegrationScope { (clientId, p12File) =>
 
-      val result = fetchSheetAndRows(username, password, "Sheet4")
+      val result = fetchSheetAndRows(clientId, p12File, "Sheet4")
 
       val numRows = result._2.size
       numRows must beGreaterThanOrEqualTo(1)
