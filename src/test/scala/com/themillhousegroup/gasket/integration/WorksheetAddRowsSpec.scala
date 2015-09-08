@@ -72,5 +72,31 @@ class WorksheetAddRowsSpec extends Specification with GasketIntegrationSettings 
 
       newRows.size must beEqualTo(numRows + 1)
     }
+
+    "Modify the worksheet both locally and remotely - multiple row case" in IntegrationScope { (clientId, p12File) =>
+
+      val result = fetchSheetAndRows(clientId, p12File, "Sheet4")
+
+      val numRows = result._2.size
+      numRows must beGreaterThanOrEqualTo(1)
+
+      val sheet = result._1
+
+      def makeRow(number: Int, total: Int) = {
+        Seq(
+          new Date().getTime.toString,
+          InetAddress.getLocalHost.getHostName,
+          s"Multi Row - $number / $total"
+        )
+      }
+
+      val newLocalSheet = Await.result(
+        sheet.addRows(Seq(makeRow(1, 3), makeRow(2, 3), makeRow(3, 3))),
+        shortWait)
+
+      val newRows = Await.result(newLocalSheet.rows, shortWait)
+
+      newRows.size must beEqualTo(numRows + 3)
+    }
   }
 }
