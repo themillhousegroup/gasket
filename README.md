@@ -57,7 +57,7 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "gasket" % "2.0.64"
+     "com.themillhousegroup" %% "gasket" % "2.0.71"
    )
 
 ```
