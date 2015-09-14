@@ -79,7 +79,7 @@ class ForComprehensionSpec extends Specification with GasketIntegrationSettings 
           acct <- Account(username, password)
           ss <- acct.spreadsheets
           ws <- ss("Example Spreadsheet").worksheets
-          rows <- ws("Sheet1").block(1 to 2, 2 to 3)
+          rows <- ws("Sheet1").blockRows(1 to 2, 2 to 3)
         } yield rows
 
       val blockRows = Await.result(futureRows, shortWait)

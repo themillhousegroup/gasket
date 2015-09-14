@@ -33,8 +33,8 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
     if (rowCount == 0) {
       Future.successful(Seq[String]())
     } else {
-      val headerBlock = block(1 to 1, 1 to colCount)
-      headerBlock.map(_.head.cells.map(_.value))
+      val headerBlockRows = blockRows(1 to 1, 1 to colCount)
+      headerBlockRows.map(_.head.cells.map(_.value))
     }
   }
 
@@ -60,9 +60,9 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
 
   /**
    * Returns a rectangular block of cells,
-   * arranged as a sequence of Rows
+   * arranged as a sequence of Cells
    */
-  def block(rowNumbers: Range, colNumbers: Range): Future[Seq[Row]] = {
+  def blockCells(rowNumbers: Range, colNumbers: Range): Future[Seq[Cell]] = Future {
     val blockCellFeedUrl = toUrl(cellFeedBaseUrlString +
       s"?min-row=${rowNumbers.head}&max-row=${rowNumbers.last}" +
       s"&min-col=${colNumbers.head}&max-col=${colNumbers.last}")
@@ -70,9 +70,22 @@ case class Worksheet(val service: SpreadsheetService, val parent: Spreadsheet, v
     val blockCellFeed = service.getFeed(blockCellFeedUrl, classOf[CellFeed])
 
     import scala.collection.JavaConverters._
-    val futureBlockCells = Future(time("cell block fetch", blockCellFeed.getEntries).asScala.map(Cell(this, _)))
+    time("cell block fetch", blockCellFeed.getEntries).asScala.map(Cell(this, _))
+  }
 
-    asRows(futureBlockCells)
+  /**
+   * Returns a rectangular block of cells,
+   * arranged as a sequence of Rows
+   */
+  def blockRows(rowNumbers: Range, colNumbers: Range): Future[Seq[Row]] = {
+    asRows(blockCells(rowNumbers, colNumbers))
+  }
+
+  /** Given an rectangular range on a worksheet, returns a Block object representation */
+  def block(rowNumbers: Range, colNumbers: Range): Future[Block] = {
+    blockCells(rowNumbers, colNumbers).map {
+      Block(this, _)
+    }
   }
 
   /**
