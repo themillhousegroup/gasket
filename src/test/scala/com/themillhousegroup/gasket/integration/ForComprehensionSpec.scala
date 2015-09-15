@@ -21,6 +21,10 @@ import com.themillhousegroup.gasket.test.{ TestHelpers, GasketIntegrationSetting
 class ForComprehensionSpec extends Specification with GasketIntegrationSettings with TestHelpers {
 
   "For Comprehension example" should {
+
+    isolated
+    sequential
+
     "get all nine cells" in IntegrationScope { (username, password) =>
 
       val futureCells =

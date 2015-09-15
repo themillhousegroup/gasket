@@ -18,6 +18,9 @@ import com.themillhousegroup.gasket.test.ExampleSpreadsheetFetcher._
  */
 class CellUpdateSpec extends Specification with GasketIntegrationSettings with TestHelpers {
 
+  isolated
+  sequential
+
   val defaultCellValue = "Cell A1"
   val moddedValue = "MODIFIED"
 
