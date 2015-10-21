@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory
 trait Timing {
 
   val log = LoggerFactory.getLogger(getClass)
-  lazy private[this] val s = new Stopwatch()
 
   protected def time[T](opName: String, op: => T): T = {
     if (log.isDebugEnabled) {
+			val s = new Stopwatch()
       s.reset
       s.start
       val result: T = op
