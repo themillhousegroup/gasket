@@ -10,14 +10,14 @@ import scala.collection.mutable.Map
 object ExampleSpreadsheetFetcher extends TestHelpers {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-	private val credentialAccountMap:scala.collection.mutable.Map[String, Future[Account]] = scala.collection.mutable.Map() 
+  private val credentialAccountMap: scala.collection.mutable.Map[String, Future[Account]] = scala.collection.mutable.Map()
 
-	private def lazyFetchAccount(clientId:String, p12File: File): Future[Account] = {
- 		if (!credentialAccountMap.contains(clientId)) {
-			credentialAccountMap.put(clientId, Account(clientId, p12File))
-		}	
-		credentialAccountMap(clientId)
-	}
+  private def lazyFetchAccount(clientId: String, p12File: File): Future[Account] = {
+    if (!credentialAccountMap.contains(clientId)) {
+      credentialAccountMap.put(clientId, Account(clientId, p12File))
+    }
+    credentialAccountMap(clientId)
+  }
 
   def fetchSheet(clientId: String, p12File: File, sheetName: String): Future[Worksheet] = {
     for {

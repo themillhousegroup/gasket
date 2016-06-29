@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
     "com.google.http-client"	%   "google-http-client-jackson"    % "1.19.0",
     "ch.qos.logback"        	%   "logback-classic"         			% "1.1.3",
     "org.mockito"           	%   "mockito-all"             			% "1.10.19",
-    "org.specs2"            	%%  "specs2"                  			% "2.3.13"  	% "test"
+    "org.specs2"            	%%  "specs2"                  			% "2.3.13"  	% "test",
+    "com.google.guava"        % "guava"                           % "19.0"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
